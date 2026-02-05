@@ -315,7 +315,7 @@
     <div style="display:flex; gap:20px; flex:1; min-height:0;">
         <div class="panel panel-draw">
             <div class="current-prize-info" id="currentPrizeDisplay">準備就緒...</div>
-            <div class="draw-box" id="rollingBox">祝您中大獎！</div>
+            <div class="draw-box" id="rollingBox">今 馬 熊 讚</div>
             <div class="controls">
                 <button class="action-btn btn-start" id="btnStart" onclick="startDraw()">開始抽獎</button>
                 <button class="action-btn btn-stop" id="btnStop" onclick="stopDraw()">停止！</button>
@@ -576,7 +576,7 @@
         clearInterval(timer); isRunning = false; drumRoll.pause();
         winners = []; currentPrizeIndex = 0; currentPrizeCountDrawn = 0;
         document.getElementById('btnStart').style.display = 'inline-block'; document.getElementById('btnStop').style.display = 'none';
-        document.getElementById('rollingBox').innerText = "祝您中大獎！"; document.getElementById('rollingBox').classList.remove('active');
+        document.getElementById('rollingBox').innerText = "今 馬 熊 讚"; document.getElementById('rollingBox').classList.remove('active');
         document.getElementById('resultsList').innerHTML = '';
         if(conn && conn.open) conn.send('stopped');
         if (backupCandidatesText) document.getElementById('candidatesInput').value = backupCandidatesText;
