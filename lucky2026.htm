@@ -23,7 +23,7 @@
             --primary-color: #4facfe; /* 亮藍色 (匯出/匯入/開始) */
             --text-color: #2c3e50;    /* 深色文字 */
             --accent-color: #ff7675;  /* 強調色 (停止/警告) */
-            --teal-color: #1abc9c;    /* 藍綠色 (正在抽取) */
+            --teal-color: #1abc9c;    /* 藍綠色 (正在抽獎) */
             --red-color: #e74c3c;     /* 紅色 (獎項名稱) */
         }
 
@@ -559,7 +559,7 @@
         const currentPrize = prizes[currentPrizeIndex];
         const remaining = currentPrize.total - currentPrizeCountDrawn;
         
-        display.innerHTML = `<span style="color:var(--teal-color);">正在抽取：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
+        display.innerHTML = `<span style="color:var(--teal-color);">正在抽獎：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
         
         btnStart.innerText = "開始抽獎";
     }

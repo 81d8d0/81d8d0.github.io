@@ -516,7 +516,7 @@
         if (currentPrizeIndex >= prizes.length) { display.innerText = "🎉 全數抽獎完畢！"; display.style.color = "#2ecc71"; btnStart.innerText = "結束"; return; }
         const currentPrize = prizes[currentPrizeIndex];
         const remaining = currentPrize.total - currentPrizeCountDrawn;
-        display.innerHTML = `<span style="color:var(--teal-color);">正在抽取：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
+        display.innerHTML = `<span style="color:var(--teal-color);">正在抽獎：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
         btnStart.innerText = "開始抽獎";
     }
 
