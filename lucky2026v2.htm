@@ -523,7 +523,7 @@
     function startDraw() {
         drumRoll.currentTime = 0; drumRoll.play().catch(e => console.log("Audio play blocked"));
         if (!hasStarted && candidates.length > 0) { backupCandidatesText = document.getElementById('candidatesInput').value; hasStarted = true; }
-        if (prizes.length === 0 || candidates.length === 0 || currentPrizeIndex >= prizes.length) { alert("請檢查獎項、名單或是否已抽完。"); drumRoll.pause(); return; }
+        if (prizes.length === 0 || candidates.length === 0 || currentPrizeIndex >= prizes.length) { alert("無法開始：請檢查獎項、名單或是否已抽完。"); drumRoll.pause(); return; }
 
         isRunning = true;
         // 自動收合側邊欄
