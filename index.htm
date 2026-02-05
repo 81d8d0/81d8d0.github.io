@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 尾牙抽獎 (V7 日系天空藍版)</title>
+    <title>🎉 尾牙抽獎 (V8 深藍典雅版)</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,18 +11,20 @@
 
     <style>
         :root {
-            /* 日向坂風格：清爽的天空藍漸層 */
-            --bg-gradient: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            /* V8 修改：背景藍色再深一點 (深藍海洋漸層) */
+            --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
             
             /* 毛玻璃效果 */
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-            --glass-shadow: 0 8px 32px 0 rgba(100, 149, 237, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.9); /* 稍微調高不透明度以對比深色背景 */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             
             /* 配色系統 */
-            --primary-color: #4facfe; /* 亮藍色按鈕 */
-            --text-color: #4b6584;    /* 深灰藍文字 */
+            --primary-color: #4facfe; /* 亮藍色按鈕 (匯出/匯入用) */
+            --text-color: #2c3e50;    /* 深色文字 */
             --accent-color: #ff7675;  /* 強調色 (停止/警告) */
+            --teal-color: #1abc9c;    /* 藍綠色 */
+            --red-color: #e74c3c;     /* 紅色 */
         }
 
         body {
@@ -38,7 +40,7 @@
             overflow: hidden; 
         }
 
-        /* --- 手機控制器模式樣式 (保持深色省電) --- */
+        /* --- 手機控制器模式樣式 --- */
         body.controller-mode {
             background: #2d3436;
             justify-content: center;
@@ -75,14 +77,15 @@
         .btn-ctrl-stop { background: linear-gradient(to bottom, #ff7675, #d63031); display: none; }
 
         body.controller-mode header,
-        body.controller-mode .main-container { display: none !important; }
+        body.controller-mode .main-container,
+        body.controller-mode .btn-mini-qr { display: none !important; }
 
         /* --- 桌面版樣式 --- */
         header { 
             text-align: center; 
             margin-bottom: 15px; 
             color: white;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         
         h1 { margin: 0; font-size: 2.2em; letter-spacing: 2px; }
@@ -117,38 +120,44 @@
             overflow-y: auto;
             min-width: 300px;
             max-width: 350px;
-            position: relative; /* 為了定位 QR 按鈕 */
         }
 
-        /* 極簡 QR 按鈕 */
+        /* V8 修改：極簡 QR 按鈕 - 改至左下角且不顯眼 */
         .btn-mini-qr {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 36px;
-            height: 36px;
+            position: fixed; /* 固定在視窗 */
+            bottom: 10px;    /* 靠下 */
+            left: 10px;      /* 靠左 */
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: white;
-            border: 1px solid #a1c4fd;
+            background: rgba(255, 255, 255, 0.3); /* 半透明背景 */
+            border: none;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 1em;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 2000; /* 確保在最上層 */
+            opacity: 0.6;  /* 平常半透明 */
+            color: white;
         }
-        .btn-mini-qr:hover { transform: scale(1.1); background: #f0f8ff; }
+        .btn-mini-qr:hover { 
+            opacity: 1; 
+            transform: scale(1.1); 
+            background: white; 
+            color: var(--text-color);
+        }
 
         .input-group { display: flex; flex-direction: column; margin-bottom: 10px; }
         .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        label { font-weight: bold; color: #3b5998; font-size: 0.95em; }
+        label { font-weight: bold; color: #34495e; font-size: 0.95em; }
         
         textarea, input[type="text"] {
             width: 100%; padding: 10px; border: 1px solid #d1d8e0; border-radius: 10px;
             resize: vertical; font-family: inherit; box-sizing: border-box; font-size: 14px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             color: #2f3640;
         }
         
@@ -159,11 +168,11 @@
             flex: 2;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .current-prize-info {
-            font-size: 1.8em; font-weight: bold; color: #4facfe;
+            font-size: 1.8em; font-weight: bold;
             margin-bottom: 30px; text-align: center; min-height: 1.5em;
             text-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
@@ -183,8 +192,8 @@
         }
 
         .draw-box.active {
-            color: #4facfe; 
-            border-color: #4facfe; 
+            color: var(--primary-color); 
+            border-color: var(--primary-color); 
             box-shadow: 0 0 30px rgba(79, 172, 254, 0.4);
             transform: scale(1.02);
             background: #fff;
@@ -198,14 +207,21 @@
         .action-btn {
             padding: 15px 45px; font-size: 1.3em; border: none; border-radius: 50px;
             cursor: pointer; font-weight: bold; letter-spacing: 1px; color: white;
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .btn-start { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); }
         .btn-stop { background: linear-gradient(to right, #ff758c 0%, #ff7eb3 100%); display: none; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); }
         
-        .btn-reset { background: #a4b0be; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold;}
-        .btn-import { background: #7bed9f; color: #2f3542; border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.85em; cursor: pointer; font-weight: bold; }
+        .btn-reset { background: #95a5a6; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold;}
+        
+        /* V8 修改：匯入按鈕改成跟匯出按鈕一樣的藍色 */
+        .btn-import { 
+            background: var(--primary-color); 
+            color: white; 
+            border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.85em; cursor: pointer; font-weight: bold; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
         /* 右側結果區 */
         .panel-results {
@@ -216,7 +232,7 @@
         
         .results-list { 
             flex: 1; overflow-y: auto; margin-top: 10px; 
-            background: rgba(255,255,255,0.6); border-radius: 12px;
+            background: rgba(255,255,255,0.7); border-radius: 12px;
         }
         .result-item { 
             padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;
@@ -232,12 +248,12 @@
         /* QR Code Modal */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: center;
             backdrop-filter: blur(8px);
         }
         .modal-content {
             background: white; padding: 30px; border-radius: 20px; text-align: center;
-            max-width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid #e1e1e1;
+            max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid #e1e1e1;
         }
         #qrcode { margin: 20px auto; border: 8px solid white; border-radius: 4px; }
 
@@ -245,10 +261,13 @@
             .main-container { flex-direction: column; height: auto; }
             body:not(.controller-mode) { height: auto; overflow-y: auto; }
             .panel { min-height: 300px; margin-bottom: 20px; }
+            .btn-mini-qr { bottom: 20px; left: 20px; width: 40px; height: 40px; } /* 手機版稍微大一點好按 */
         }
     </style>
 </head>
 <body>
+
+<button class="btn-mini-qr" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
 
 <div class="controller-ui" id="controllerUI">
     <div class="controller-status" id="ctrlStatus">等待連線...</div>
@@ -262,8 +281,6 @@
 
 <div class="main-container">
     <div class="panel panel-settings">
-        <button class="btn-mini-qr" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
-
         <div class="input-group">
             <label>📝 活動標題</label>
             <input type="text" id="titleInput" value="公司年終尾牙" oninput="updateTitle()">
@@ -292,8 +309,8 @@
 林志玲
 張學友
 周杰倫</textarea>
-            <div class="hint">剩餘人數: <span id="candidateCount" style="color:#4facfe; font-weight:bold;">0</span> 人</div>
-            <div class="hint" style="color:#ff7675; font-size:0.75em;">(中獎者將自動從名單移除)</div>
+            <div class="hint">剩餘人數: <span id="candidateCount" style="color:var(--primary-color); font-weight:bold;">0</span> 人</div>
+            <div class="hint" style="color:var(--accent-color); font-size:0.75em;">(中獎者將自動從名單移除)</div>
         </div>
 
         <div style="margin-top: auto;">
@@ -317,7 +334,7 @@
     <div class="panel panel-results">
         <div class="results-header" style="display:flex; justify-content:space-between; align-items: center; margin-bottom:10px;">
             <label style="margin:0; font-size:1.1em; color:#2f3542;">🏆 中獎名單</label>
-            <button onclick="exportResults()" style="padding: 6px 12px; background:#4facfe; color:white; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">📥 匯出</button>
+            <button onclick="exportResults()" style="padding: 6px 12px; background:var(--primary-color); color:white; border-radius:6px; border:none; cursor:pointer; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📥 匯出</button>
         </div>
         <div class="results-list" id="resultsList"></div>
     </div>
@@ -328,18 +345,14 @@
         <h2 style="margin-top:0; color:#2f3542;">📱 手機連線 (管理員)</h2>
         <div id="qrcode"></div>
         <p style="color:#7f8c8d; font-size:0.9em; margin-top:15px;">掃描後，手機即可變成控制器</p>
-        <button onclick="document.getElementById('qrModal').style.display='none'" style="padding:10px 30px; background:#a4b0be; color:white; border:none; border-radius:6px; cursor:pointer;">關閉</button>
+        <button onclick="document.getElementById('qrModal').style.display='none'" style="padding:10px 30px; background:#95a5a6; color:white; border:none; border-radius:6px; cursor:pointer;">關閉</button>
     </div>
 </div>
 
 <script>
-    // --- 音效設定 (使用 CDN) ---
-    // 這裡使用 Google Actions 的公開音效庫，請確保有網路連線
-    const bgmDrum = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"); 
-    // 為了更好的體驗，建議將 drum sound 換成較長的滾動聲，這裡使用循環
+    // --- 音效設定 ---
     const drumRoll = new Audio("https://www.soundjay.com/misc/sounds/drum-roll-01.mp3");
     drumRoll.loop = true;
-    
     const sfxCheer = new Audio("https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg");
 
     // --- 核心變數 ---
@@ -509,7 +522,7 @@
 
         if (prizes.length === 0) {
             display.innerText = "⚠️ 請先設定獎項";
-            display.style.color = "#ff7675";
+            display.style.color = "var(--accent-color)";
             btnStart.innerText = "請先設定";
             return;
         }
@@ -521,12 +534,14 @@
         }
         const currentPrize = prizes[currentPrizeIndex];
         const remaining = currentPrize.total - currentPrizeCountDrawn;
-        display.innerHTML = `正在抽取：<span style="color:#4facfe; font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
+        
+        // V8 修改：狀態文字配色優化 (藍綠色 + 紅色)
+        display.innerHTML = `<span style="color:var(--teal-color);">正在抽取：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
+        
         btnStart.innerText = "開始抽獎";
     }
 
     function startDraw() {
-        // 音效播放
         drumRoll.currentTime = 0;
         drumRoll.play().catch(e => console.log("Audio play blocked"));
 
@@ -559,7 +574,6 @@
         clearInterval(timer);
         isRunning = false;
 
-        // 停止鼓聲，播放歡呼
         drumRoll.pause();
         sfxCheer.currentTime = 0;
         sfxCheer.play().catch(e => console.log("Audio error"));
@@ -571,7 +585,6 @@
         box.innerText = winnerName;
         box.classList.remove('active');
         
-        // --- 觸發彩帶特效 ---
         triggerConfetti();
 
         const prize = prizes[currentPrizeIndex];
