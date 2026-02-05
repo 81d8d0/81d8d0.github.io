@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>活動抽獎</title>
+    <title>活動抽獎 (V9 極簡側邊導航版)</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -22,7 +22,7 @@
             --red-color: #e74c3c;
             
             --sidebar-width-expanded: 320px;
-            --sidebar-width-collapsed: 64px; /* 收合後留下的窄欄寬度 */
+            --sidebar-width-collapsed: 60px; /* 收合後留下的窄欄寬度 */
         }
 
         body {
@@ -32,7 +32,7 @@
             color: var(--text-color);
             height: 100vh; width: 100vw;
             box-sizing: border-box;
-            display: flex; /* 使用 Flex 排版整個頁面 */
+            display: flex;
             overflow: hidden; 
         }
 
@@ -40,13 +40,13 @@
         .sidebar {
             width: var(--sidebar-width-expanded);
             background: var(--glass-bg);
-            border-right: 1px solid rgba(0,0,0,0.1);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
             display: flex; flex-direction: column;
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
-            flex-shrink: 0; /* 防止被擠壓 */
-            overflow: hidden; /* 收合時隱藏內容 */
+            flex-shrink: 0;
+            overflow: hidden; 
         }
 
         /* 收合狀態 (變成窄欄) */
@@ -54,16 +54,17 @@
             width: var(--sidebar-width-collapsed);
         }
 
-        /* 漢堡選單按鈕 */
+        /* 漢堡選單按鈕 (固定在左上) */
         .menu-btn {
             height: 60px;
+            min-height: 60px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            font-size: 24px; color: #555;
+            font-size: 22px; color: #57606f;
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            transition: background 0.2s;
+            transition: color 0.2s, background 0.2s;
         }
-        .menu-btn:hover { background: rgba(0,0,0,0.05); }
+        .menu-btn:hover { background: rgba(0,0,0,0.03); color: var(--primary-color); }
 
         /* 設定內容容器 (收合時隱藏) */
         .settings-content {
@@ -78,41 +79,55 @@
         .sidebar.collapsed .settings-content {
             opacity: 0; 
             pointer-events: none;
-            display: none; /* 直接隱藏以免佔位 */
+            display: none; 
         }
 
-        /* 底部工具列 (QR/音效) - 收合時依然顯示垂直排列 */
+        /* 底部工具列 (QR/音效) */
         .sidebar-footer {
             margin-top: auto;
             padding: 15px 0;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            border-top: 1px solid rgba(0,0,0,0.05);
             display: flex; 
             flex-direction: row; /* 展開時橫向 */
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
         }
 
         .sidebar.collapsed .sidebar-footer {
             flex-direction: column; /* 收合時垂直 */
             gap: 15px;
+            padding-bottom: 20px;
         }
 
+        /* V9 修改：極簡化底部按鈕 (無背景) */
         .footer-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: var(--primary-color); border: none; cursor: pointer;
-            font-size: 1.2em; display: flex; align-items: center; justify-content: center;
-            color: white; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 40px; height: 40px; 
+            border-radius: 50%;
+            background: transparent; /* 無背景 */
+            border: none; 
+            cursor: pointer;
+            font-size: 1.4em; /* 圖示稍微加大 */
+            display: flex; align-items: center; justify-content: center;
+            color: #7f8fa6; /* 預設為低調的灰色 */
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            box-shadow: none; /* 移除陰影 */
         }
-        .footer-btn:hover { transform: scale(1.1); }
-        .footer-btn.muted { background: #95a5a6; }
+        .footer-btn:hover { 
+            transform: scale(1.15); 
+            opacity: 1;
+            color: var(--primary-color); /* 滑鼠移過變亮藍色 */
+            background: rgba(0,0,0,0.03); /* 極淡的背景提示 */
+        }
+        .footer-btn.muted { color: #b2bec3; opacity: 0.5; } /* 靜音時更淡 */
 
         /* --- 右側主要內容區 --- */
         .main-content {
-            flex: 1; /* 佔滿剩餘空間 */
+            flex: 1;
             padding: 20px;
             display: flex; flex-direction: column;
             gap: 20px;
-            min-width: 0; /* 防止 flex 子元素溢出 */
+            min-width: 0;
         }
 
         /* --- 桌面版樣式 (右側內容) --- */
@@ -236,8 +251,9 @@
         @media (max-width: 900px) {
             body { flex-direction: column; overflow-y: auto; }
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #ddd; }
-            .sidebar.collapsed { height: 60px; overflow: hidden; } /* 手機版收合只留 header */
+            .sidebar.collapsed { height: 60px; overflow: hidden; } 
             .sidebar.collapsed .settings-content { display: none; }
+            .sidebar-footer { display: none; } /* 手機版通常不用這個footer */
             .menu-btn { justify-content: flex-start; padding-left: 20px; }
             .main-content { margin-left: 0; width: 100%; padding: 10px; height: auto; }
             .panel { min-height: auto; }
@@ -341,6 +357,7 @@
 </div>
 
 <script>
+    // --- 音效設定 ---
     const drumRoll = new Audio("https://www.soundjay.com/misc/sounds/drum-roll-01.mp3");
     drumRoll.loop = true;
     const sfxCheer = new Audio("https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg");
