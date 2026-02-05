@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>活動抽獎 (V9 極簡側邊導航版)</title>
+    <title>活動抽獎 (V10 完美導航版)</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -22,7 +22,7 @@
             --red-color: #e74c3c;
             
             --sidebar-width-expanded: 320px;
-            --sidebar-width-collapsed: 60px; /* 收合後留下的窄欄寬度 */
+            --sidebar-width-collapsed: 60px; /* 窄欄寬度 */
         }
 
         body {
@@ -49,31 +49,37 @@
             overflow: hidden; 
         }
 
-        /* 收合狀態 (變成窄欄) */
+        /* 收合狀態 */
         .sidebar.collapsed {
             width: var(--sidebar-width-collapsed);
         }
 
-        /* 漢堡選單按鈕 (固定在左上) */
+        /* 漢堡選單按鈕 (V10 修改：固定寬度靠左) */
         .menu-btn {
+            width: var(--sidebar-width-collapsed); /* 鎖定寬度為 60px */
             height: 60px;
             min-height: 60px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; /* 在 60px 內置中 */
             cursor: pointer;
-            font-size: 22px; color: #57606f;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 24px; color: #57606f;
+            /* 移除底線讓視覺更乾淨 */
             transition: color 0.2s, background 0.2s;
         }
-        .menu-btn:hover { background: rgba(0,0,0,0.03); color: var(--primary-color); }
+        .menu-btn:hover { 
+            background: rgba(0,0,0,0.05); 
+            color: var(--primary-color);
+        }
 
         /* 設定內容容器 (收合時隱藏) */
         .settings-content {
             flex: 1;
-            padding: 20px;
+            padding: 10px 20px;
             overflow-y: auto;
             opacity: 1;
             transition: opacity 0.2s;
-            min-width: 300px; /* 保持寬度，避免文字換行難看 */
+            min-width: 300px; /* 保持內容寬度，避免文字擠壓 */
         }
         
         .sidebar.collapsed .settings-content {
@@ -86,40 +92,43 @@
         .sidebar-footer {
             margin-top: auto;
             padding: 15px 0;
-            border-top: 1px solid rgba(0,0,0,0.05);
+            /* border-top: 1px solid rgba(0,0,0,0.05); 可選：移除分隔線更乾淨 */
             display: flex; 
-            flex-direction: row; /* 展開時橫向 */
+            flex-direction: row; /* 展開時橫向排列 */
             justify-content: space-evenly;
             align-items: center;
         }
 
         .sidebar.collapsed .sidebar-footer {
-            flex-direction: column; /* 收合時垂直 */
+            flex-direction: column; /* 收合時垂直排列 */
             gap: 15px;
             padding-bottom: 20px;
         }
 
-        /* V9 修改：極簡化底部按鈕 (無背景) */
+        /* V10 修改：極簡化底部按鈕 (無背景色) */
         .footer-btn {
             width: 40px; height: 40px; 
             border-radius: 50%;
             background: transparent; /* 無背景 */
             border: none; 
             cursor: pointer;
-            font-size: 1.4em; /* 圖示稍微加大 */
+            font-size: 1.5em; /* 圖示大一點 */
             display: flex; align-items: center; justify-content: center;
-            color: #7f8fa6; /* 預設為低調的灰色 */
-            opacity: 0.7;
+            color: #b2bec3; /* 預設淡灰色，不搶眼 */
             transition: all 0.2s ease;
-            box-shadow: none; /* 移除陰影 */
+            box-shadow: none; /* 無陰影 */
         }
+        
         .footer-btn:hover { 
-            transform: scale(1.15); 
-            opacity: 1;
+            transform: scale(1.1); 
             color: var(--primary-color); /* 滑鼠移過變亮藍色 */
-            background: rgba(0,0,0,0.03); /* 極淡的背景提示 */
+            background: rgba(0,0,0,0.03); /* 極淡的互動回饋 */
         }
-        .footer-btn.muted { color: #b2bec3; opacity: 0.5; } /* 靜音時更淡 */
+        
+        /* 音效關閉時的樣式 */
+        .footer-btn.muted { 
+            color: #dfe6e9; /* 更淡的灰色表示關閉 */
+        }
 
         /* --- 右側主要內容區 --- */
         .main-content {
@@ -130,14 +139,14 @@
             min-width: 0;
         }
 
-        /* --- 桌面版樣式 (右側內容) --- */
+        /* --- 桌面版樣式 --- */
         header { 
             text-align: center; margin-bottom: 10px; color: white; 
             text-shadow: 0 2px 5px rgba(0,0,0,0.3); flex-shrink: 0;
         }
         h1 { margin: 0; font-size: 2.2em; letter-spacing: 2px; }
 
-        /* 通用面板樣式 */
+        /* 通用面板 */
         .panel {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -207,7 +216,7 @@
         .result-name { font-weight: bold; color: #2f3542; font-size: 1.1em; }
         .file-input-hidden { display: none; }
 
-        /* --- 手機控制器模式 (極簡化) --- */
+        /* --- 手機控制器模式 --- */
         body.controller-mode {
             background: #2d3436; justify-content: center; align-items: center; padding: 0;
         }
@@ -231,7 +240,6 @@
         .btn-ctrl-start { background: linear-gradient(to bottom, #2ecc71, #27ae60); }
         .btn-ctrl-stop { background: linear-gradient(to bottom, #e74c3c, #c0392b); display: none; }
 
-        /* 隱藏手機不需元件 */
         body.controller-mode header,
         body.controller-mode .main-content,
         body.controller-mode .sidebar { display: none !important; }
@@ -253,8 +261,8 @@
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #ddd; }
             .sidebar.collapsed { height: 60px; overflow: hidden; } 
             .sidebar.collapsed .settings-content { display: none; }
-            .sidebar-footer { display: none; } /* 手機版通常不用這個footer */
-            .menu-btn { justify-content: flex-start; padding-left: 20px; }
+            .sidebar-footer { display: none; }
+            .menu-btn { width: 100%; justify-content: flex-start; padding-left: 20px; box-sizing: border-box; }
             .main-content { margin-left: 0; width: 100%; padding: 10px; height: auto; }
             .panel { min-height: auto; }
         }
