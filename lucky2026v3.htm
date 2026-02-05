@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>活動抽獎 (體感搖一搖版)</title>
+    <title>活動抽獎 (雙重搖晃版)</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,20 +11,15 @@
 
     <style>
         :root {
-            /* 深藍典雅漸層背景 */
             --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            
-            /* 毛玻璃效果 */
             --glass-bg: rgba(255, 255, 255, 0.9);
             --glass-border: 1px solid rgba(255, 255, 255, 0.4);
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            
-            /* 配色系統 */
-            --primary-color: #4facfe; /* 亮藍色 */
-            --text-color: #2c3e50;    /* 深色文字 */
-            --accent-color: #ff7675;  /* 強調色 */
-            --teal-color: #1abc9c;    /* 藍綠色 */
-            --red-color: #e74c3c;     /* 紅色 */
+            --primary-color: #4facfe;
+            --text-color: #2c3e50;
+            --accent-color: #ff7675;
+            --teal-color: #1abc9c;
+            --red-color: #e74c3c;
         }
 
         body {
@@ -65,6 +60,14 @@
             font-size: 1.4em;
             margin-bottom: 10px;
             font-weight: bold;
+            min-height: 1.5em; /* 預留高度避免跳動 */
+            transition: color 0.3s;
+        }
+        
+        .controller-instruction {
+            color: #bdc3c7;
+            font-size: 0.9em;
+            margin-bottom: 20px;
         }
 
         /* 手機主按鈕 */
@@ -91,11 +94,11 @@
         }
         .btn-ctrl-round:active { background: rgba(255,255,255,0.4); }
 
-        /* 搖一搖啟用按鈕 (非常重要) */
+        /* 搖一搖啟用按鈕 */
         .shake-enable-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 5000;
-            display: none; /* 連線後顯示 */
+            display: none;
             flex-direction: column; justify-content: center; align-items: center;
             padding: 20px; box-sizing: border-box;
         }
@@ -134,7 +137,6 @@
 
         .panel-settings { flex: 1; gap: 15px; overflow-y: auto; min-width: 300px; max-width: 350px; }
 
-        /* 左下角懸浮按鈕 */
         .float-btn {
             position: fixed; bottom: 10px; width: 32px; height: 32px;
             border-radius: 50%; background: rgba(255, 255, 255, 0.3);
@@ -233,17 +235,18 @@
 
 <div class="controller-ui" id="controllerUI">
     <div class="controller-status" id="ctrlStatus">等待連線...</div>
+    <div class="controller-instruction" id="ctrlInstruction">搖一下手機開始</div>
     
     <button class="btn-ctrl-big btn-ctrl-start" id="ctrlStart" onclick="remoteAction('start')">GO</button>
-    <button class="btn-ctrl-big btn-ctrl-stop" id="ctrlStop" onclick="remoteAction('stop')">STOP</button>
+    <button class="btn-ctrl-big btn-ctrl-stop" id="ctrlStop" onclick="handleMobileStopClick()">STOP</button>
     
     <div class="mobile-sub-controls">
         <button class="btn-ctrl-round" id="ctrlSoundBtn" onclick="remoteAction('toggle-sound')">🔊</button>
     </div>
 
     <div class="shake-enable-overlay" id="shakeOverlay">
-        <p style="color:white; font-size:1.2em; margin-bottom:20px;">使用搖一搖前，請先授權</p>
-        <button class="btn-enable-shake" onclick="requestMotionPermission()">🖐️ 點我開啟搖一搖功能</button>
+        <p style="color:white; font-size:1.2em; margin-bottom:20px;">請點擊下方按鈕<br>啟用搖一搖功能</p>
+        <button class="btn-enable-shake" onclick="requestMotionPermission()">🖐️ 點我啟用</button>
     </div>
 </div>
 
@@ -325,28 +328,19 @@
 </div>
 
 <script>
-    // --- 音效設定 ---
     const drumRoll = new Audio("https://www.soundjay.com/misc/sounds/drum-roll-01.mp3");
     drumRoll.loop = true;
     const sfxCheer = new Audio("https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg");
 
-    // --- 聲音開關控制 ---
     let isMuted = false;
-    
     function toggleSound() {
         isMuted = !isMuted;
         drumRoll.muted = isMuted;
         sfxCheer.muted = isMuted;
-        
-        // 更新電腦版按鈕
         const icon = isMuted ? "🔇" : "🔊";
         const btnHost = document.getElementById('btnSoundHost');
         if(btnHost) btnHost.innerText = icon;
-
-        // 通知手機更新圖示
-        if (conn && conn.open && !isController) {
-            conn.send(isMuted ? 'status-mute' : 'status-sound');
-        }
+        if (conn && conn.open && !isController) conn.send(isMuted ? 'status-mute' : 'status-sound');
     }
 
     function updateCtrlSoundIcon(muted) {
@@ -379,7 +373,6 @@
         } else {
             initHostMode();
         }
-        
         updateTitle();
         parsePrizes();      
         parseCandidates();  
@@ -387,27 +380,19 @@
         setupFileImports();
     });
 
-    // --- 密碼保護 QR Code ---
     function checkPasswordAndShowQR() {
         const input = prompt("🔒 請輸入管理員密碼以顯示連線 QR Code：");
-        if (input === 'luckydof') {
-            showQRCode();
-        } else if (input !== null) { 
-            alert("❌ 密碼錯誤！");
-        }
+        if (input === 'luckydof') showQRCode();
+        else if (input !== null) alert("❌ 密碼錯誤！");
     }
 
-    // --- 連線功能 (主機) ---
     function initHostMode() {
         peer = new Peer(); 
         peer.on('open', (id) => { myPeerId = id; });
         peer.on('connection', (c) => {
             conn = c;
             alert("📱 手機遙控器已連線成功！");
-            
-            setTimeout(() => {
-                conn.send(isMuted ? 'status-mute' : 'status-sound');
-            }, 500);
+            setTimeout(() => { conn.send(isMuted ? 'status-mute' : 'status-sound'); }, 500);
 
             conn.on('data', (data) => {
                 if (data === 'start' && !isRunning) startDraw();
@@ -428,15 +413,22 @@
         modal.style.display = 'flex';
     }
 
-    function closeQRCode(e) {
-        if (e.target.id === 'qrModal') e.target.style.display = 'none';
-    }
+    function closeQRCode(e) { if (e.target.id === 'qrModal') e.target.style.display = 'none'; }
 
-    // --- 連線功能 (控制器) & 搖一搖邏輯 ---
+    // --- 手機端邏輯 (含雙重搖晃停止) ---
     let lastX = 0, lastY = 0, lastZ = 0;
     let lastShakeTime = 0;
+    let stopShakeCount = 0; // 計算停止搖晃次數
+    let shakeResetTimer = null; // 重置計數器的 timer
     const SHAKE_THRESHOLD = 20; 
-    const SHAKE_COOLDOWN = 2000; // 修正：冷卻時間 2 秒，防連點
+    const SHAKE_COOLDOWN = 600; // 基礎冷卻
+    const START_SAFETY_DELAY = 2000; // 開始後的防誤觸時間
+
+    // 手機端點擊 STOP 按鈕 (手動點擊當作搖了兩下)
+    function handleMobileStopClick() {
+        remoteAction('stop');
+        resetStopLogic();
+    }
 
     function initControllerMode() {
         document.body.classList.add('controller-mode');
@@ -451,14 +443,16 @@
             conn.on('open', () => {
                 document.getElementById('ctrlStatus').innerText = "🟢 已連線";
                 document.getElementById('ctrlStatus').style.color = "#2ecc71";
-                // 連線成功後，顯示全螢幕搖一搖授權遮罩
                 document.getElementById('shakeOverlay').style.display = 'flex';
             });
             
             conn.on('data', (data) => {
                 if (data === 'status-mute') updateCtrlSoundIcon(true);
                 if (data === 'status-sound') updateCtrlSoundIcon(false);
-                if (data === 'stopped') toggleCtrlBtnState(false);
+                if (data === 'stopped') {
+                    toggleCtrlBtnState(false);
+                    resetStopLogic(); // 電腦端停止也要重置手機邏輯
+                }
                 if (data === 'started') toggleCtrlBtnState(true);
             });
         });
@@ -468,33 +462,34 @@
         if (isDrawing) {
             document.getElementById('ctrlStart').style.display = 'none';
             document.getElementById('ctrlStop').style.display = 'block';
+            document.getElementById('ctrlInstruction').innerText = "再搖兩下停止";
+            // 剛開始時，讓最後搖晃時間延後，避免連點
+            lastShakeTime = Date.now() + START_SAFETY_DELAY;
+            resetStopLogic();
         } else {
             document.getElementById('ctrlStart').style.display = 'block';
             document.getElementById('ctrlStop').style.display = 'none';
+            document.getElementById('ctrlInstruction').innerText = "搖一下手機開始";
+            resetStopLogic();
         }
+    }
+
+    function resetStopLogic() {
+        stopShakeCount = 0;
+        clearTimeout(shakeResetTimer);
+        document.getElementById('ctrlStatus').innerText = "🟢 已連線";
+        document.getElementById('ctrlStatus').style.color = "#2ecc71";
     }
 
     function remoteAction(action) {
-        if (conn && conn.open) {
-            conn.send(action);
-            if (action === 'start') toggleCtrlBtnState(true);
-            if (action === 'stop') toggleCtrlBtnState(false);
-        } else {
-            alert("尚未連線");
-        }
+        if (conn && conn.open) conn.send(action);
+        else alert("尚未連線");
     }
 
     function requestMotionPermission() {
-        // iOS 13+ 需要請求權限
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
             DeviceMotionEvent.requestPermission()
-                .then(response => {
-                    if (response === 'granted') {
-                        startShakeDetection();
-                    } else {
-                        alert("需允許權限才能使用搖一搖功能。");
-                    }
-                })
+                .then(response => { if (response === 'granted') startShakeDetection(); else alert("需允許權限"); })
                 .catch(console.error);
         } else {
             startShakeDetection();
@@ -502,95 +497,82 @@
     }
 
     function startShakeDetection() {
-        // 隱藏遮罩
         document.getElementById('shakeOverlay').style.display = 'none';
         document.getElementById('ctrlStatus').innerText = "📳 搖一搖已就緒！";
         
         window.addEventListener('devicemotion', (event) => {
             const current = event.accelerationIncludingGravity;
             if (!current) return;
-
             const now = Date.now();
-            if ((now - lastShakeTime) < SHAKE_COOLDOWN) return; // 冷卻中
+            if ((now - lastShakeTime) < SHAKE_COOLDOWN) return;
 
-            const deltaX = Math.abs(current.x - lastX);
-            const deltaY = Math.abs(current.y - lastY);
-            const deltaZ = Math.abs(current.z - lastZ);
-
-            if ((deltaX + deltaY + deltaZ) > SHAKE_THRESHOLD) {
+            const delta = Math.abs(current.x - lastX) + Math.abs(current.y - lastY) + Math.abs(current.z - lastZ);
+            if (delta > SHAKE_THRESHOLD) {
                 lastShakeTime = now;
                 handleShakeTrigger();
             }
-
-            lastX = current.x;
-            lastY = current.y;
-            lastZ = current.z;
+            lastX = current.x; lastY = current.y; lastZ = current.z;
         });
     }
 
     function handleShakeTrigger() {
         const isStartVisible = document.getElementById('ctrlStart').style.display !== 'none';
         
-        // 震動回饋
-        if (navigator.vibrate) navigator.vibrate(200);
-
         if (isStartVisible) {
+            // --- 狀態：未開始 -> 搖一下開始 ---
             remoteAction('start');
+            toggleCtrlBtnState(true);
+            if (navigator.vibrate) navigator.vibrate(200);
         } else {
-            remoteAction('stop');
+            // --- 狀態：進行中 -> 搖兩下停止 ---
+            stopShakeCount++;
+            
+            if (stopShakeCount === 1) {
+                // 第一次搖晃：警告
+                document.getElementById('ctrlStatus').innerText = "⚠️ 再搖一次停止！";
+                document.getElementById('ctrlStatus').style.color = "#e67e22";
+                if (navigator.vibrate) navigator.vibrate(100);
+
+                // 設定計時器，1.5秒內沒搖第二次就重置
+                clearTimeout(shakeResetTimer);
+                shakeResetTimer = setTimeout(() => {
+                    stopShakeCount = 0;
+                    document.getElementById('ctrlStatus').innerText = "運行中...";
+                    document.getElementById('ctrlStatus').style.color = "white";
+                }, 1500);
+            } else if (stopShakeCount >= 2) {
+                // 第二次搖晃：執行停止
+                remoteAction('stop');
+                toggleCtrlBtnState(false); // 本地先更新 UI
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }
         }
     }
 
     // --- 抽獎邏輯 ---
     document.getElementById('candidatesInput').addEventListener('input', () => parseCandidates());
-    document.getElementById('prizesInput').addEventListener('input', () => {
-        if (!isRunning) { parsePrizes(); updateStatusDisplay(); }
-    });
+    document.getElementById('prizesInput').addEventListener('input', () => { if (!isRunning) { parsePrizes(); updateStatusDisplay(); } });
 
     function setupFileImports() {
-        document.getElementById('importPrizesFile').addEventListener('change', function(e) {
-            handleFileUpload(e, 'prizesInput', () => { parsePrizes(); updateStatusDisplay(); alert('獎項匯入完成！'); });
-        });
-        document.getElementById('importCandidatesFile').addEventListener('change', function(e) {
-            handleFileUpload(e, 'candidatesInput', () => { parseCandidates(); alert(`名單匯入完成！共 ${candidates.length} 人。`); hasStarted = false; });
-        });
+        document.getElementById('importPrizesFile').addEventListener('change', function(e) { handleFileUpload(e, 'prizesInput', () => { parsePrizes(); updateStatusDisplay(); alert('獎項匯入完成！'); }); });
+        document.getElementById('importCandidatesFile').addEventListener('change', function(e) { handleFileUpload(e, 'candidatesInput', () => { parseCandidates(); alert(`名單匯入完成！共 ${candidates.length} 人。`); hasStarted = false; }); });
     }
 
     function handleFileUpload(event, targetId, callback) {
-        const file = event.target.files[0];
-        if (!file) return;
+        const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById(targetId).value = e.target.result;
-            if (callback) callback();
-            event.target.value = ''; 
-        };
+        reader.onload = function(e) { document.getElementById(targetId).value = e.target.result; if (callback) callback(); event.target.value = ''; };
         reader.readAsText(file, "UTF-8");
     }
 
-    function updateTitle() { 
-        const val = document.getElementById('titleInput').value;
-        document.getElementById('pageTitle').innerText = val ? val : "活動抽獎"; 
-    }
-
+    function updateTitle() { const val = document.getElementById('titleInput').value; document.getElementById('pageTitle').innerText = val ? val : "活動抽獎"; }
     function parsePrizes() {
-        const text = document.getElementById('prizesInput').value;
-        prizes = [];
+        const text = document.getElementById('prizesInput').value; prizes = [];
         text.split('\n').forEach(line => {
             if (!line.trim()) return;
             let parts = line.replace(/，/g, ',').split(',');
-            if (parts.length > 1) {
-                prizes.push({ name: parts[0].trim(), total: parseInt(parts[1]) || 1 });
-            } else {
-                parts = line.trim().split(/\s+/);
-                let count = parseInt(parts[parts.length-1]);
-                if(!isNaN(count) && parts.length > 1) {
-                    parts.pop();
-                    prizes.push({ name: parts.join(' '), total: count });
-                } else {
-                    prizes.push({ name: line.trim(), total: 1 });
-                }
-            }
+            if (parts.length > 1) prizes.push({ name: parts[0].trim(), total: parseInt(parts[1]) || 1 });
+            else { parts = line.trim().split(/\s+/); let count = parseInt(parts[parts.length-1]); if(!isNaN(count) && parts.length > 1) { parts.pop(); prizes.push({ name: parts.join(' '), total: count }); } else { prizes.push({ name: line.trim(), total: 1 }); } }
         });
     }
 
@@ -603,163 +585,79 @@
     function updateStatusDisplay() {
         const display = document.getElementById('currentPrizeDisplay');
         const btnStart = document.getElementById('btnStart');
-
-        if (prizes.length === 0) {
-            display.innerText = "⚠️ 請先設定獎項";
-            display.style.color = "var(--accent-color)";
-            btnStart.innerText = "請先設定";
-            return;
-        }
-        if (currentPrizeIndex >= prizes.length) {
-            display.innerText = "🎉 全數抽獎完畢！";
-            display.style.color = "#2ecc71";
-            btnStart.innerText = "結束";
-            return;
-        }
+        if (prizes.length === 0) { display.innerText = "⚠️ 請先設定獎項"; display.style.color = "var(--accent-color)"; btnStart.innerText = "請先設定"; return; }
+        if (currentPrizeIndex >= prizes.length) { display.innerText = "🎉 全數抽獎完畢！"; display.style.color = "#2ecc71"; btnStart.innerText = "結束"; return; }
         const currentPrize = prizes[currentPrizeIndex];
         const remaining = currentPrize.total - currentPrizeCountDrawn;
-        
         display.innerHTML = `<span style="color:var(--teal-color);">正在抽取：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
-        
         btnStart.innerText = "開始抽獎";
     }
 
     function startDraw() {
-        drumRoll.currentTime = 0;
-        drumRoll.play().catch(e => console.log("Audio play blocked"));
-
-        if (!hasStarted && candidates.length > 0) {
-            backupCandidatesText = document.getElementById('candidatesInput').value;
-            hasStarted = true;
-        }
-        if (prizes.length === 0 || candidates.length === 0 || currentPrizeIndex >= prizes.length) {
-            alert("無法開始：請檢查獎項、名單或是否已抽完。");
-            drumRoll.pause();
-            return;
-        }
+        drumRoll.currentTime = 0; drumRoll.play().catch(e => console.log("Audio play blocked"));
+        if (!hasStarted && candidates.length > 0) { backupCandidatesText = document.getElementById('candidatesInput').value; hasStarted = true; }
+        if (prizes.length === 0 || candidates.length === 0 || currentPrizeIndex >= prizes.length) { alert("無法開始：請檢查設定。"); drumRoll.pause(); return; }
 
         isRunning = true;
-        document.getElementById('btnStart').style.display = 'none';
-        document.getElementById('btnStop').style.display = 'inline-block';
-        
-        // 發送狀態給手機，確保同步
+        document.getElementById('btnStart').style.display = 'none'; document.getElementById('btnStop').style.display = 'inline-block';
         if(conn && conn.open) conn.send('started');
-
-        const box = document.getElementById('rollingBox');
-        box.classList.add('active');
-
+        const box = document.getElementById('rollingBox'); box.classList.add('active');
         if (timer) clearInterval(timer);
-        timer = setInterval(() => {
-            const randomIndex = Math.floor(Math.random() * candidates.length);
-            box.innerText = candidates[randomIndex];
-        }, 50);
+        timer = setInterval(() => { const randomIndex = Math.floor(Math.random() * candidates.length); box.innerText = candidates[randomIndex]; }, 50);
     }
 
     function stopDraw() {
         if (!isRunning) return;
-        clearInterval(timer);
-        isRunning = false;
-
-        drumRoll.pause();
-        sfxCheer.currentTime = 0;
-        sfxCheer.play().catch(e => console.log("Audio error"));
-        
-        // 發送狀態給手機
+        clearInterval(timer); isRunning = false;
+        drumRoll.pause(); sfxCheer.currentTime = 0; sfxCheer.play().catch(e => console.log("Audio error"));
         if(conn && conn.open) conn.send('stopped');
 
-        const winnerIndex = Math.floor(Math.random() * candidates.length);
-        const winnerName = candidates[winnerIndex];
-
-        const box = document.getElementById('rollingBox');
-        box.innerText = winnerName;
-        box.classList.remove('active');
-        
+        const winnerIndex = Math.floor(Math.random() * candidates.length); const winnerName = candidates[winnerIndex];
+        const box = document.getElementById('rollingBox'); box.innerText = winnerName; box.classList.remove('active');
         triggerConfetti();
 
         const prize = prizes[currentPrizeIndex];
         winners.push({ prizeName: prize.name, winner: winnerName });
-        
         candidates.splice(winnerIndex, 1); 
         document.getElementById('candidatesInput').value = candidates.join('\n');
         document.getElementById('candidateCount').innerText = candidates.length;
-
         addWinnerToDOM(prize.name, winnerName);
-
         currentPrizeCountDrawn++;
-        if (currentPrizeCountDrawn >= prize.total) {
-            currentPrizeIndex++;
-            currentPrizeCountDrawn = 0;
-        }
-
-        document.getElementById('btnStart').style.display = 'inline-block';
-        document.getElementById('btnStop').style.display = 'none';
+        if (currentPrizeCountDrawn >= prize.total) { currentPrizeIndex++; currentPrizeCountDrawn = 0; }
+        document.getElementById('btnStart').style.display = 'inline-block'; document.getElementById('btnStop').style.display = 'none';
         updateStatusDisplay();
     }
 
     function triggerConfetti() {
-        var duration = 3 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        var duration = 3000; var animationEnd = Date.now() + duration; var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
         function random(min, max) { return Math.random() * (max - min) + min; }
         var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) { return clearInterval(interval); }
+            var timeLeft = animationEnd - Date.now(); if (timeLeft <= 0) return clearInterval(interval);
             var particleCount = 50 * (timeLeft / duration);
             confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
             confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
         }, 250);
     }
 
-    function addWinnerToDOM(prizeName, winnerName) {
-        const container = document.getElementById('resultsList');
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.innerHTML = `<span class="result-prize">${prizeName}</span><span class="result-name">${winnerName}</span>`;
-        container.insertBefore(item, container.firstChild);
-    }
+    function addWinnerToDOM(p, w) { const c = document.getElementById('resultsList'); const i = document.createElement('div'); i.className = 'result-item'; i.innerHTML = `<span class="result-prize">${p}</span><span class="result-name">${w}</span>`; c.insertBefore(i, c.firstChild); }
 
     function resetAll() {
-        let msg = "確定要重置嗎？";
-        if (hasStarted && backupCandidatesText) msg += "\n\n將還原原始名單並重置。";
-        if (!confirm(msg)) return;
-
-        clearInterval(timer);
-        isRunning = false;
-        drumRoll.pause();
-        
-        winners = [];
-        currentPrizeIndex = 0;
-        currentPrizeCountDrawn = 0;
-        
-        document.getElementById('btnStart').style.display = 'inline-block';
-        document.getElementById('btnStop').style.display = 'none';
-        document.getElementById('rollingBox').innerText = "祝您中大獎！";
-        document.getElementById('rollingBox').classList.remove('active');
+        if (!confirm("確定要重置嗎？")) return;
+        clearInterval(timer); isRunning = false; drumRoll.pause();
+        winners = []; currentPrizeIndex = 0; currentPrizeCountDrawn = 0;
+        document.getElementById('btnStart').style.display = 'inline-block'; document.getElementById('btnStop').style.display = 'none';
+        document.getElementById('rollingBox').innerText = "祝您中大獎！"; document.getElementById('rollingBox').classList.remove('active');
         document.getElementById('resultsList').innerHTML = '';
-        
-        // 確保手機端也重置為 Start 狀態
         if(conn && conn.open) conn.send('stopped');
-
         if (backupCandidatesText) document.getElementById('candidatesInput').value = backupCandidatesText;
-        
-        parsePrizes();
-        parseCandidates();
-        updateStatusDisplay();
-        hasStarted = false; 
+        parsePrizes(); parseCandidates(); updateStatusDisplay(); hasStarted = false; 
     }
 
     function exportResults() {
-        if (winners.length === 0) { alert("無資料可匯出"); return; }
-        let csvContent = "\uFEFF獎項,得獎者\n";
-        winners.forEach(w => csvContent += `${w.prizeName},${w.winner}\n`);
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `中獎名單_${new Date().getTime()}.csv`;
-        link.click();
+        if (winners.length === 0) { alert("無資料"); return; }
+        let c = "\uFEFF獎項,得獎者\n"; winners.forEach(w => c += `${w.prizeName},${w.winner}\n`);
+        const b = new Blob([c], { type: 'text/csv;charset=utf-8;' }); const u = URL.createObjectURL(b); const l = document.createElement("a"); l.href = u; l.download = `中獎名單_${new Date().getTime()}.csv`; l.click();
     }
 </script>
-
 </body>
 </html>
