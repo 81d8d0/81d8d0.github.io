@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 尾牙抽獎 (V8 深藍典雅版)</title>
+    <title>活動抽獎</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,20 +11,20 @@
 
     <style>
         :root {
-            /* V8 修改：背景藍色再深一點 (深藍海洋漸層) */
+            /* 深藍典雅漸層背景 */
             --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
             
             /* 毛玻璃效果 */
-            --glass-bg: rgba(255, 255, 255, 0.9); /* 稍微調高不透明度以對比深色背景 */
+            --glass-bg: rgba(255, 255, 255, 0.9);
             --glass-border: 1px solid rgba(255, 255, 255, 0.4);
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             
             /* 配色系統 */
-            --primary-color: #4facfe; /* 亮藍色按鈕 (匯出/匯入用) */
+            --primary-color: #4facfe; /* 亮藍色 (匯出/匯入/開始) */
             --text-color: #2c3e50;    /* 深色文字 */
             --accent-color: #ff7675;  /* 強調色 (停止/警告) */
-            --teal-color: #1abc9c;    /* 藍綠色 */
-            --red-color: #e74c3c;     /* 紅色 */
+            --teal-color: #1abc9c;    /* 藍綠色 (正在抽取) */
+            --red-color: #e74c3c;     /* 紅色 (獎項名稱) */
         }
 
         body {
@@ -88,7 +88,7 @@
             text-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         
-        h1 { margin: 0; font-size: 2.2em; letter-spacing: 2px; }
+        h1 { margin: 0; font-size: 2.2em; letter-spacing: 2px; min-height: 1.2em;}
 
         .main-container {
             display: flex;
@@ -100,7 +100,7 @@
             width: 100%;
         }
 
-        /* 通用卡片 (Glassmorphism) */
+        /* 通用卡片 */
         .panel {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -122,15 +122,15 @@
             max-width: 350px;
         }
 
-        /* V8 修改：極簡 QR 按鈕 - 改至左下角且不顯眼 */
+        /* 極簡 QR 按鈕 (左下角) */
         .btn-mini-qr {
-            position: fixed; /* 固定在視窗 */
-            bottom: 10px;    /* 靠下 */
-            left: 10px;      /* 靠左 */
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3); /* 半透明背景 */
+            background: rgba(255, 255, 255, 0.3);
             border: none;
             cursor: pointer;
             font-size: 1em;
@@ -139,8 +139,8 @@
             justify-content: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
             transition: all 0.3s;
-            z-index: 2000; /* 確保在最上層 */
-            opacity: 0.6;  /* 平常半透明 */
+            z-index: 2000;
+            opacity: 0.6;
             color: white;
         }
         .btn-mini-qr:hover { 
@@ -212,10 +212,8 @@
 
         .btn-start { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); }
         .btn-stop { background: linear-gradient(to right, #ff758c 0%, #ff7eb3 100%); display: none; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); }
-        
         .btn-reset { background: #95a5a6; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold;}
         
-        /* V8 修改：匯入按鈕改成跟匯出按鈕一樣的藍色 */
         .btn-import { 
             background: var(--primary-color); 
             color: white; 
@@ -261,7 +259,7 @@
             .main-container { flex-direction: column; height: auto; }
             body:not(.controller-mode) { height: auto; overflow-y: auto; }
             .panel { min-height: 300px; margin-bottom: 20px; }
-            .btn-mini-qr { bottom: 20px; left: 20px; width: 40px; height: 40px; } /* 手機版稍微大一點好按 */
+            .btn-mini-qr { bottom: 20px; left: 20px; width: 40px; height: 40px; }
         }
     </style>
 </head>
@@ -276,14 +274,14 @@
 </div>
 
 <header>
-    <h1 id="pageTitle">🎉 尾牙抽獎活動</h1>
+    <h1 id="pageTitle">活動抽獎</h1>
 </header>
 
 <div class="main-container">
     <div class="panel panel-settings">
         <div class="input-group">
             <label>📝 活動標題</label>
-            <input type="text" id="titleInput" value="公司年終尾牙" oninput="updateTitle()">
+            <input type="text" id="titleInput" value="" oninput="updateTitle()" placeholder="請輸入活動標題">
         </div>
 
         <div class="input-group">
@@ -292,9 +290,8 @@
                 <button class="btn-import" onclick="document.getElementById('importPrizesFile').click()">📂 匯入</button>
                 <input type="file" id="importPrizesFile" class="file-input-hidden" accept=".txt,.csv">
             </div>
-            <textarea id="prizesInput" rows="6" placeholder="獎項, 數量">特獎現金五萬, 1
-一獎 iPhone 16, 2
-普獎 禮券1000元, 5</textarea>
+            <textarea id="prizesInput" rows="6" placeholder="獎項, 數量">局長 禮券, 3
+副局長 禮券, 5</textarea>
         </div>
 
         <div class="input-group">
@@ -303,12 +300,16 @@
                 <button class="btn-import" onclick="document.getElementById('importCandidatesFile').click()">📂 匯入</button>
                 <input type="file" id="importCandidatesFile" class="file-input-hidden" accept=".txt,.csv">
             </div>
-            <textarea id="candidatesInput" rows="8" placeholder="每行一個名字">王小明
-李大華
-陳美麗
-林志玲
-張學友
-周杰倫</textarea>
+            <textarea id="candidatesInput" rows="12" placeholder="每行一個名字">吉伊卡哇
+小八貓
+兔兔
+小桃鼠
+栗子饅頭
+海獺勇者
+風獅爺
+古本屋小螃蟹
+鎧甲先生
+睡衣派對</textarea>
             <div class="hint">剩餘人數: <span id="candidateCount" style="color:var(--primary-color); font-weight:bold;">0</span> 人</div>
             <div class="hint" style="color:var(--accent-color); font-size:0.75em;">(中獎者將自動從名單移除)</div>
         </div>
@@ -487,7 +488,10 @@
         reader.readAsText(file, "UTF-8");
     }
 
-    function updateTitle() { document.getElementById('pageTitle').innerText = document.getElementById('titleInput').value || "活動抽獎"; }
+    function updateTitle() { 
+        const val = document.getElementById('titleInput').value;
+        document.getElementById('pageTitle').innerText = val ? val : "活動抽獎"; 
+    }
 
     function parsePrizes() {
         const text = document.getElementById('prizesInput').value;
@@ -535,7 +539,6 @@
         const currentPrize = prizes[currentPrizeIndex];
         const remaining = currentPrize.total - currentPrizeCountDrawn;
         
-        // V8 修改：狀態文字配色優化 (藍綠色 + 紅色)
         display.innerHTML = `<span style="color:var(--teal-color);">正在抽取：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
         
         btnStart.innerText = "開始抽獎";
