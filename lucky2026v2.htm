@@ -11,216 +11,149 @@
 
     <style>
         :root {
-            /* 深藍典雅漸層背景 */
             --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            
-            /* 毛玻璃效果 */
-            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-bg: rgba(255, 255, 255, 0.95);
             --glass-border: 1px solid rgba(255, 255, 255, 0.4);
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            --primary-color: #4facfe;
+            --text-color: #2c3e50;
+            --accent-color: #ff7675;
+            --teal-color: #1abc9c;
+            --red-color: #e74c3c;
             
-            /* 配色系統 */
-            --primary-color: #4facfe; /* 亮藍色 */
-            --text-color: #2c3e50;    /* 深色文字 */
-            --accent-color: #ff7675;  /* 強調色 */
-            --teal-color: #1abc9c;    /* 藍綠色 */
-            --red-color: #e74c3c;     /* 紅色 */
+            --sidebar-width-expanded: 320px;
+            --sidebar-width-collapsed: 60px;
         }
 
         body {
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            padding: 20px;
+            margin: 0; padding: 0;
             background: var(--bg-gradient);
             color: var(--text-color);
-            height: 100vh;
+            height: 100vh; width: 100vw;
             box-sizing: border-box;
             display: flex;
-            flex-direction: column;
             overflow: hidden; 
         }
 
-        /* --- 手機控制器模式樣式 --- */
-        body.controller-mode {
-            background: #2d3436;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            position: relative;
-        }
-        
-        .controller-ui {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-        }
-
-        .controller-status {
-            color: white;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .btn-ctrl-big {
-            width: 200px; height: 200px; border-radius: 50%;
-            border: 8px solid rgba(255,255,255,0.2);
-            font-size: 2.5em; font-weight: bold; color: white;
-            cursor: pointer; box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-        }
-        .btn-ctrl-big:active { transform: scale(0.9); }
-        .btn-ctrl-start { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
-        .btn-ctrl-stop { background: linear-gradient(to bottom, #ff7675, #d63031); display: none; }
-
-        /* 手機版音量按鈕 */
-        .btn-ctrl-sound-mobile {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.5);
-            color: white;
-            font-size: 1.5em;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            margin-top: 30px;
-        }
-        .btn-ctrl-sound-mobile:active { background: rgba(255,255,255,0.4); }
-
-        body.controller-mode header,
-        body.controller-mode .main-container,
-        body.controller-mode .float-btn { display: none !important; }
-
-        /* --- 桌面版樣式 --- */
-        header { 
-            text-align: center; 
-            margin-bottom: 15px; 
-            color: white;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        h1 { margin: 0; font-size: 2.2em; letter-spacing: 2px; min-height: 1.2em;}
-
-        .main-container {
-            display: flex;
-            gap: 20px;
-            flex: 1;
-            height: calc(100% - 70px);
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* 通用卡片 */
-        .panel {
+        /* --- 左側導航欄 (Sidebar) --- */
+        .sidebar {
+            width: var(--sidebar-width-expanded);
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: var(--glass-border);
-            border-radius: 20px;
-            box-shadow: var(--glass-shadow);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            flex-shrink: 0;
+            overflow: hidden; 
         }
 
-        /* 左側設定區 */
-        .panel-settings {
-            flex: 1;
-            gap: 15px;
-            overflow-y: auto;
-            min-width: 300px;
-            max-width: 350px;
+        .sidebar.collapsed {
+            width: var(--sidebar-width-collapsed);
         }
 
-        /* 左下角懸浮按鈕共用樣式 */
-        .float-btn {
-            position: fixed;
-            bottom: 10px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
+        /* 漢堡選單按鈕 */
+        .menu-btn {
+            width: var(--sidebar-width-collapsed);
+            height: 60px;
+            min-height: 60px;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            z-index: 2000;
-            opacity: 0.6;
-            color: white;
+            font-size: 24px; color: #57606f;
+            transition: color 0.2s, background 0.2s;
         }
-        .float-btn:hover { 
-            opacity: 1; 
+        .menu-btn:hover { background: rgba(0,0,0,0.05); color: var(--primary-color); }
+
+        /* 設定內容容器 */
+        .settings-content {
+            flex: 1;
+            padding: 10px 20px;
+            overflow-y: auto;
+            opacity: 1;
+            transition: opacity 0.2s;
+            min-width: 300px;
+        }
+        
+        .sidebar.collapsed .settings-content {
+            opacity: 0; pointer-events: none; display: none; 
+        }
+
+        /* 底部工具列 */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 15px 0;
+            display: flex; flex-direction: row; 
+            justify-content: space-evenly; align-items: center;
+        }
+
+        .sidebar.collapsed .sidebar-footer {
+            flex-direction: column; gap: 15px; padding-bottom: 20px;
+        }
+
+        /* 極簡按鈕樣式 */
+        .footer-btn {
+            width: 40px; height: 40px; 
+            border-radius: 50%;
+            background: transparent;
+            border: none; cursor: pointer;
+            font-size: 1.5em;
+            display: flex; align-items: center; justify-content: center;
+            color: #b2bec3; /* 預設淡灰 */
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+        .footer-btn:hover { 
             transform: scale(1.1); 
-            background: white; 
-            color: var(--text-color);
-        }
-
-        /* QR Code 按鈕 (靠左) */
-        .btn-mini-qr { left: 10px; }
-        
-        /* 聲音按鈕 (靠 QR Code 右邊 10px 處) */
-        .btn-mini-sound { left: 52px; }
-
-        .input-group { display: flex; flex-direction: column; margin-bottom: 10px; }
-        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        label { font-weight: bold; color: #34495e; font-size: 0.95em; }
-        
-        textarea, input[type="text"] {
-            width: 100%; padding: 10px; border: 1px solid #d1d8e0; border-radius: 10px;
-            resize: vertical; font-family: inherit; box-sizing: border-box; font-size: 14px;
-            background: rgba(255,255,255,0.95);
-            color: #2f3640;
+            color: var(--primary-color);
+            background: rgba(0,0,0,0.03);
         }
         
-        .hint { font-size: 0.85em; color: #7f8fa6; margin-top: 4px; }
+        /* 音效關閉時的樣式 */
+        .footer-btn.muted { color: #dfe6e9; opacity: 0.6; }
 
-        /* 中間抽獎區 */
-        .panel-draw {
-            flex: 2;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
+        /* --- 右側主要內容區 --- */
+        .main-content {
+            flex: 1; padding: 20px;
+            display: flex; flex-direction: column; gap: 20px;
+            min-width: 0;
         }
 
+        header { 
+            text-align: center; margin-bottom: 10px; color: white; 
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3); flex-shrink: 0;
+        }
+        h1 { margin: 0; font-size: 2.2em; letter-spacing: 2px; }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: var(--glass-border); border-radius: 20px;
+            box-shadow: var(--glass-shadow); padding: 20px;
+            display: flex; flex-direction: column;
+        }
+
+        .panel-draw { 
+            flex: 2; align-items: center; justify-content: center; 
+            background: rgba(255, 255, 255, 0.92); min-height: 300px;
+        }
         .current-prize-info {
-            font-size: 1.8em; font-weight: bold;
-            margin-bottom: 30px; text-align: center; min-height: 1.5em;
+            font-size: 1.8em; font-weight: bold; margin-bottom: 30px; text-align: center; min-height: 1.5em;
             text-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-
         .draw-box {
-            width: 90%; 
-            height: 250px; 
-            background: linear-gradient(to bottom, #ffffff, #f0f8ff);
-            border-radius: 25px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 3.5em; font-weight: bold; color: #2f3542;
-            margin-bottom: 40px; 
-            border: 4px solid #dff9fb; 
-            box-shadow: inset 0 0 20px rgba(161, 196, 253, 0.2);
-            text-align: center; word-break: break-all; padding: 20px;
-            transition: all 0.3s;
+            width: 90%; height: 250px; background: linear-gradient(to bottom, #ffffff, #f0f8ff);
+            border-radius: 25px; display: flex; align-items: center; justify-content: center;
+            font-size: 3.5em; font-weight: bold; color: #2f3542; margin-bottom: 40px; 
+            border: 4px solid #dff9fb; box-shadow: inset 0 0 20px rgba(161, 196, 253, 0.2);
+            text-align: center; word-break: break-all; padding: 20px; transition: all 0.3s;
         }
-
         .draw-box.active {
-            color: var(--primary-color); 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 30px rgba(79, 172, 254, 0.4);
-            transform: scale(1.02);
-            background: #fff;
+            color: var(--primary-color); border-color: var(--primary-color); 
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.4); transform: scale(1.02); background: #fff;
         }
 
         .controls { display: flex; gap: 20px; }
-
         button { font-family: inherit; transition: transform 0.1s; }
         button:active { transform: scale(0.96); }
 
@@ -229,39 +162,64 @@
             cursor: pointer; font-weight: bold; letter-spacing: 1px; color: white;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-
         .btn-start { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); }
         .btn-stop { background: linear-gradient(to right, #ff758c 0%, #ff7eb3 100%); display: none; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); }
         .btn-reset { background: #95a5a6; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold;}
-        
         .btn-import { 
-            background: var(--primary-color); 
-            color: white; 
-            border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.85em; cursor: pointer; font-weight: bold; 
+            background: var(--primary-color); color: white; border: none; border-radius: 6px; 
+            padding: 5px 12px; font-size: 0.85em; cursor: pointer; font-weight: bold; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* 右側結果區 */
-        .panel-results {
-            flex: 1;
-            overflow: hidden;
-            min-width: 250px;
-        }
+        .input-group { display: flex; flex-direction: column; margin-bottom: 10px; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        label { font-weight: bold; color: #34495e; font-size: 0.95em; }
         
-        .results-list { 
-            flex: 1; overflow-y: auto; margin-top: 10px; 
-            background: rgba(255,255,255,0.7); border-radius: 12px;
+        textarea, input[type="text"] {
+            width: 100%; padding: 10px; border: 1px solid #d1d8e0; border-radius: 10px;
+            resize: vertical; font-family: inherit; box-sizing: border-box; font-size: 14px;
+            background: rgba(255,255,255,0.95); color: #2f3640;
         }
+        .hint { font-size: 0.85em; color: #7f8fa6; margin-top: 4px; }
+
+        .panel-results { flex: 1; overflow: hidden; min-width: 250px; }
+        .results-list { flex: 1; overflow-y: auto; margin-top: 10px; background: rgba(255,255,255,0.7); border-radius: 12px; }
         .result-item { 
             padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;
             animation: slideIn 0.3s ease;
         }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
         .result-prize { font-size: 0.85em; color: #57606f; background: #dfe4ea; padding: 2px 8px; border-radius: 10px; }
         .result-name { font-weight: bold; color: #2f3542; font-size: 1.1em; }
-
         .file-input-hidden { display: none; }
+
+        /* --- 手機控制器模式 --- */
+        body.controller-mode {
+            background: #2d3436; justify-content: center; align-items: center; padding: 0;
+        }
+        .controller-ui {
+            display: none; width: 100%; height: 100%;
+            flex-direction: column; justify-content: center; align-items: center;
+            gap: 30px; text-align: center;
+        }
+        .controller-status {
+            color: white; font-size: 1.5em; margin-bottom: 20px; font-weight: bold;
+            min-height: 1.5em; transition: color 0.3s;
+        }
+        .btn-ctrl-big {
+            width: 220px; height: 220px; border-radius: 50%;
+            border: 10px solid rgba(255,255,255,0.2);
+            font-size: 3em; font-weight: bold; color: white;
+            cursor: pointer; box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+        .btn-ctrl-big:active { transform: scale(0.95); }
+        .btn-ctrl-start { background: linear-gradient(to bottom, #2ecc71, #27ae60); }
+        .btn-ctrl-stop { background: linear-gradient(to bottom, #e74c3c, #c0392b); display: none; }
+
+        body.controller-mode header,
+        body.controller-mode .main-content,
+        body.controller-mode .sidebar { display: none !important; }
 
         /* QR Code Modal */
         .modal-overlay {
@@ -276,34 +234,31 @@
         #qrcode { margin: 20px auto; border: 8px solid white; border-radius: 4px; }
 
         @media (max-width: 900px) {
-            .main-container { flex-direction: column; height: auto; }
-            body:not(.controller-mode) { height: auto; overflow-y: auto; }
-            .panel { min-height: 300px; margin-bottom: 20px; }
-            .btn-mini-qr { bottom: 20px; left: 20px; width: 40px; height: 40px; }
-            .btn-mini-sound { bottom: 20px; left: 70px; width: 40px; height: 40px; }
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #ddd; }
+            .sidebar.collapsed { height: 60px; overflow: hidden; } 
+            .sidebar.collapsed .settings-content { display: none; }
+            .sidebar-footer { display: none; }
+            .menu-btn { width: 100%; justify-content: flex-start; padding-left: 20px; box-sizing: border-box; }
+            .main-content { margin-left: 0; width: 100%; padding: 10px; height: auto; }
+            .panel { min-height: auto; }
         }
     </style>
 </head>
 <body>
 
-<button class="float-btn btn-mini-qr" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
-<button class="float-btn btn-mini-sound" id="btnSoundHost" onclick="toggleSound()" title="開啟/關閉聲音">🔊</button>
-
 <div class="controller-ui" id="controllerUI">
     <div class="controller-status" id="ctrlStatus">等待連線...</div>
-    
     <button class="btn-ctrl-big btn-ctrl-start" id="ctrlStart" onclick="remoteAction('start')">GO</button>
     <button class="btn-ctrl-big btn-ctrl-stop" id="ctrlStop" onclick="remoteAction('stop')">STOP</button>
-    
-    <button class="btn-ctrl-sound-mobile" id="ctrlSoundBtn" onclick="remoteAction('toggle-sound')">🔊</button>
 </div>
 
-<header>
-    <h1 id="pageTitle">活動抽獎</h1>
-</header>
+<div class="sidebar" id="sidebar">
+    <div class="menu-btn" onclick="toggleSidebar()" title="展開/收合設定">
+        ☰
+    </div>
 
-<div class="main-container">
-    <div class="panel panel-settings">
+    <div class="settings-content">
         <div class="input-group">
             <label>📝 活動標題</label>
             <input type="text" id="titleInput" value="" oninput="updateTitle()" placeholder="請輸入活動標題">
@@ -315,8 +270,10 @@
                 <button class="btn-import" onclick="document.getElementById('importPrizesFile').click()">📂 匯入</button>
                 <input type="file" id="importPrizesFile" class="file-input-hidden" accept=".txt,.csv">
             </div>
-            <textarea id="prizesInput" rows="6" placeholder="獎項, 數量">局長 禮券, 3
-副局長 禮券, 5</textarea>
+            <textarea id="prizesInput" rows="6" placeholder="獎項, 數量">專委 禮券, 5
+主秘 禮券, 4
+副局長 禮券, 3 
+局長 禮券, 2</textarea>
         </div>
 
         <div class="input-group">
@@ -339,30 +296,39 @@
             <div class="hint" style="color:var(--accent-color); font-size:0.75em;">(中獎者將自動從名單移除)</div>
         </div>
 
-        <div style="margin-top: auto;">
+        <div style="margin-top: 15px;">
             <button class="btn-reset" onclick="resetAll()">⚠️ 重置所有結果</button>
         </div>
     </div>
 
-    <div class="panel panel-draw">
-        <div class="current-prize-info" id="currentPrizeDisplay">準備就緒...</div>
-        
-        <div class="draw-box" id="rollingBox">
-            祝您中大獎！
-        </div>
-
-        <div class="controls">
-            <button class="action-btn btn-start" id="btnStart" onclick="startDraw()">開始抽獎</button>
-            <button class="action-btn btn-stop" id="btnStop" onclick="stopDraw()">停止！</button>
-        </div>
+    <div class="sidebar-footer">
+        <button class="footer-btn" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
+        <button class="footer-btn muted" id="btnSoundHost" onclick="toggleSound()" title="開啟/關閉音效">🔇</button>
     </div>
+</div>
 
-    <div class="panel panel-results">
-        <div class="results-header" style="display:flex; justify-content:space-between; align-items: center; margin-bottom:10px;">
-            <label style="margin:0; font-size:1.1em; color:#2f3542;">🏆 中獎名單</label>
-            <button onclick="exportResults()" style="padding: 6px 12px; background:var(--primary-color); color:white; border-radius:6px; border:none; cursor:pointer; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📥 匯出</button>
+<div class="main-content">
+    <header>
+        <h1 id="pageTitle">活動抽獎</h1>
+    </header>
+
+    <div style="display:flex; gap:20px; flex:1; min-height:0;">
+        <div class="panel panel-draw">
+            <div class="current-prize-info" id="currentPrizeDisplay">準備就緒...</div>
+            <div class="draw-box" id="rollingBox">祝您中大獎！</div>
+            <div class="controls">
+                <button class="action-btn btn-start" id="btnStart" onclick="startDraw()">開始抽獎</button>
+                <button class="action-btn btn-stop" id="btnStop" onclick="stopDraw()">停止！</button>
+            </div>
         </div>
-        <div class="results-list" id="resultsList"></div>
+
+        <div class="panel panel-results">
+            <div class="results-header" style="display:flex; justify-content:space-between; align-items: center; margin-bottom:10px;">
+                <label style="margin:0; font-size:1.1em; color:#2f3542;">🏆 中獎名單</label>
+                <button onclick="exportResults()" style="padding: 6px 12px; background:var(--primary-color); color:white; border-radius:6px; border:none; cursor:pointer; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📥 匯出</button>
+            </div>
+            <div class="results-list" id="resultsList"></div>
+        </div>
     </div>
 </div>
 
@@ -381,32 +347,34 @@
     drumRoll.loop = true;
     const sfxCheer = new Audio("https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg");
 
-    // --- 聲音開關控制 (主機與手機同步) ---
-    let isMuted = false;
-    
+    // 預設靜音
+    let isMuted = true;
+    drumRoll.muted = true;
+    sfxCheer.muted = true;
+
     function toggleSound() {
         isMuted = !isMuted;
         drumRoll.muted = isMuted;
         sfxCheer.muted = isMuted;
-        
-        // 更新電腦版按鈕
         const icon = isMuted ? "🔇" : "🔊";
         const btnHost = document.getElementById('btnSoundHost');
-        if(btnHost) btnHost.innerText = icon;
-
-        // 如果連線中，通知手機更新圖示
-        if (conn && conn.open && !isController) {
-            conn.send(isMuted ? 'status-mute' : 'status-sound');
+        if(btnHost) {
+            btnHost.innerText = icon;
+            if(isMuted) btnHost.classList.add('muted'); else btnHost.classList.remove('muted');
         }
     }
 
-    // 更新手機上的靜音按鈕
-    function updateCtrlSoundIcon(muted) {
-        const btn = document.getElementById('ctrlSoundBtn');
-        if(btn) btn.innerText = muted ? "🔇" : "🔊";
+    // --- 側邊欄控制 ---
+    function toggleSidebar(forceClose) {
+        const sidebar = document.getElementById('sidebar');
+        if (forceClose === true) {
+            sidebar.classList.add('collapsed');
+        } else {
+            sidebar.classList.toggle('collapsed');
+        }
     }
 
-    // --- 核心變數 ---
+    // --- 核心邏輯 ---
     let candidates = [];
     let backupCandidatesText = "";
     let hasStarted = false;
@@ -417,55 +385,32 @@
     let timer = null;
     let isRunning = false;
 
-    // --- 連線變數 ---
     let peer = null;
     let conn = null;
     let myPeerId = null;
     const urlParams = new URLSearchParams(window.location.search);
     const isController = urlParams.has('remote');
 
-    // --- 初始化 ---
     window.addEventListener('DOMContentLoaded', () => {
-        if (isController) {
-            initControllerMode();
-        } else {
-            initHostMode();
-        }
-        
-        updateTitle();
-        parsePrizes();      
-        parseCandidates();  
-        updateStatusDisplay();
-        setupFileImports();
+        if (isController) { initControllerMode(); } else { initHostMode(); }
+        updateTitle(); parsePrizes(); parseCandidates(); updateStatusDisplay(); setupFileImports();
     });
 
-    // --- 密碼保護 QR Code ---
     function checkPasswordAndShowQR() {
         const input = prompt("🔒 請輸入管理員密碼以顯示連線 QR Code：");
-        if (input === 'luckydof') {
-            showQRCode();
-        } else if (input !== null) { 
-            alert("❌ 密碼錯誤！");
-        }
+        if (input === 'luckydof') showQRCode();
+        else if (input !== null) alert("❌ 密碼錯誤！");
     }
 
-    // --- 連線功能 (主機) ---
     function initHostMode() {
         peer = new Peer(); 
         peer.on('open', (id) => { myPeerId = id; });
         peer.on('connection', (c) => {
             conn = c;
             alert("📱 手機遙控器已連線成功！");
-            
-            // 連線成功後，馬上發送當前音效狀態給手機
-            setTimeout(() => {
-                conn.send(isMuted ? 'status-mute' : 'status-sound');
-            }, 500);
-
             conn.on('data', (data) => {
                 if (data === 'start' && !isRunning) startDraw();
                 if (data === 'stop' && isRunning) stopDraw();
-                if (data === 'toggle-sound') toggleSound(); // 接收手機的切換指令
             });
         });
         peer.on('error', (err) => console.error(err));
@@ -481,11 +426,8 @@
         modal.style.display = 'flex';
     }
 
-    function closeQRCode(e) {
-        if (e.target.id === 'qrModal') e.target.style.display = 'none';
-    }
+    function closeQRCode(e) { if (e.target.id === 'qrModal') e.target.style.display = 'none'; }
 
-    // --- 連線功能 (控制器) ---
     function initControllerMode() {
         document.body.classList.add('controller-mode');
         document.getElementById('controllerUI').style.display = 'flex';
@@ -500,90 +442,58 @@
                 document.getElementById('ctrlStatus').innerText = "🟢 已連線";
                 document.getElementById('ctrlStatus').style.color = "#2ecc71";
             });
-            
-            // 監聽主機傳來的狀態
             conn.on('data', (data) => {
-                if (data === 'status-mute') updateCtrlSoundIcon(true);
-                if (data === 'status-sound') updateCtrlSoundIcon(false);
-                if (data === 'stopped') { // 主機停止時同步介面
-                    document.getElementById('ctrlStart').style.display = 'block';
-                    document.getElementById('ctrlStop').style.display = 'none';
-                }
+                if (data === 'stopped') toggleCtrlBtnState(false);
+                if (data === 'started') toggleCtrlBtnState(true);
             });
         });
+    }
+
+    function toggleCtrlBtnState(isDrawing) {
+        if (isDrawing) {
+            document.getElementById('ctrlStart').style.display = 'none';
+            document.getElementById('ctrlStop').style.display = 'block';
+        } else {
+            document.getElementById('ctrlStart').style.display = 'block';
+            document.getElementById('ctrlStop').style.display = 'none';
+        }
     }
 
     function remoteAction(action) {
         if (conn && conn.open) {
             conn.send(action);
-            
-            // UI 即時反應
-            if (action === 'start') {
-                document.getElementById('ctrlStart').style.display = 'none';
-                document.getElementById('ctrlStop').style.display = 'block';
-            } else if (action === 'stop') {
-                document.getElementById('ctrlStart').style.display = 'block';
-                document.getElementById('ctrlStop').style.display = 'none';
-            } 
-            // 音效切換會等待主機回傳狀態再更新 icon，確保同步
+            if (action === 'start') toggleCtrlBtnState(true);
+            if (action === 'stop') toggleCtrlBtnState(false);
         } else {
             alert("尚未連線");
         }
     }
 
-    // --- 抽獎邏輯 ---
     document.getElementById('candidatesInput').addEventListener('input', () => parseCandidates());
-    document.getElementById('prizesInput').addEventListener('input', () => {
-        if (!isRunning) { parsePrizes(); updateStatusDisplay(); }
-    });
+    document.getElementById('prizesInput').addEventListener('input', () => { if (!isRunning) { parsePrizes(); updateStatusDisplay(); } });
 
     function setupFileImports() {
-        document.getElementById('importPrizesFile').addEventListener('change', function(e) {
-            handleFileUpload(e, 'prizesInput', () => { parsePrizes(); updateStatusDisplay(); alert('獎項匯入完成！'); });
-        });
-        document.getElementById('importCandidatesFile').addEventListener('change', function(e) {
-            handleFileUpload(e, 'candidatesInput', () => { parseCandidates(); alert(`名單匯入完成！共 ${candidates.length} 人。`); hasStarted = false; });
-        });
+        document.getElementById('importPrizesFile').addEventListener('change', function(e) { handleFileUpload(e, 'prizesInput', () => { parsePrizes(); updateStatusDisplay(); alert('獎項匯入完成！'); }); });
+        document.getElementById('importCandidatesFile').addEventListener('change', function(e) { handleFileUpload(e, 'candidatesInput', () => { parseCandidates(); alert(`名單匯入完成！共 ${candidates.length} 人。`); hasStarted = false; }); });
     }
 
     function handleFileUpload(event, targetId, callback) {
-        const file = event.target.files[0];
-        if (!file) return;
+        const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById(targetId).value = e.target.result;
-            if (callback) callback();
-            event.target.value = ''; 
-        };
+        reader.onload = function(e) { document.getElementById(targetId).value = e.target.result; if (callback) callback(); event.target.value = ''; };
         reader.readAsText(file, "UTF-8");
     }
 
-    function updateTitle() { 
-        const val = document.getElementById('titleInput').value;
-        document.getElementById('pageTitle').innerText = val ? val : "活動抽獎"; 
-    }
-
+    function updateTitle() { const val = document.getElementById('titleInput').value; document.getElementById('pageTitle').innerText = val ? val : "活動抽獎"; }
     function parsePrizes() {
-        const text = document.getElementById('prizesInput').value;
-        prizes = [];
+        const text = document.getElementById('prizesInput').value; prizes = [];
         text.split('\n').forEach(line => {
             if (!line.trim()) return;
             let parts = line.replace(/，/g, ',').split(',');
-            if (parts.length > 1) {
-                prizes.push({ name: parts[0].trim(), total: parseInt(parts[1]) || 1 });
-            } else {
-                parts = line.trim().split(/\s+/);
-                let count = parseInt(parts[parts.length-1]);
-                if(!isNaN(count) && parts.length > 1) {
-                    parts.pop();
-                    prizes.push({ name: parts.join(' '), total: count });
-                } else {
-                    prizes.push({ name: line.trim(), total: 1 });
-                }
-            }
+            if (parts.length > 1) prizes.push({ name: parts[0].trim(), total: parseInt(parts[1]) || 1 });
+            else { parts = line.trim().split(/\s+/); let count = parseInt(parts[parts.length-1]); if(!isNaN(count) && parts.length > 1) { parts.pop(); prizes.push({ name: parts.join(' '), total: count }); } else { prizes.push({ name: line.trim(), total: 1 }); } }
         });
     }
-
     function parseCandidates() {
         const text = document.getElementById('candidatesInput').value;
         candidates = text.split('\n').map(s => s.trim()).filter(s => s !== '');
@@ -593,156 +503,82 @@
     function updateStatusDisplay() {
         const display = document.getElementById('currentPrizeDisplay');
         const btnStart = document.getElementById('btnStart');
-
-        if (prizes.length === 0) {
-            display.innerText = "⚠️ 請先設定獎項";
-            display.style.color = "var(--accent-color)";
-            btnStart.innerText = "請先設定";
-            return;
-        }
-        if (currentPrizeIndex >= prizes.length) {
-            display.innerText = "🎉 全數抽獎完畢！";
-            display.style.color = "#2ecc71";
-            btnStart.innerText = "結束";
-            return;
-        }
+        if (prizes.length === 0) { display.innerText = "⚠️ 請先設定獎項"; display.style.color = "var(--accent-color)"; btnStart.innerText = "請先設定"; return; }
+        if (currentPrizeIndex >= prizes.length) { display.innerText = "🎉 全數抽獎完畢！"; display.style.color = "#2ecc71"; btnStart.innerText = "結束"; return; }
         const currentPrize = prizes[currentPrizeIndex];
         const remaining = currentPrize.total - currentPrizeCountDrawn;
-        
         display.innerHTML = `<span style="color:var(--teal-color);">正在抽取：</span><span style="color:var(--red-color); font-size:1.3em;">${currentPrize.name}</span> <span style="font-size:0.7em; color:#7f8fa6; background:#f1f2f6; padding:2px 8px; border-radius:10px;">剩 ${remaining} 名</span>`;
-        
         btnStart.innerText = "開始抽獎";
     }
 
     function startDraw() {
-        drumRoll.currentTime = 0;
-        drumRoll.play().catch(e => console.log("Audio play blocked"));
-
-        if (!hasStarted && candidates.length > 0) {
-            backupCandidatesText = document.getElementById('candidatesInput').value;
-            hasStarted = true;
-        }
-        if (prizes.length === 0 || candidates.length === 0 || currentPrizeIndex >= prizes.length) {
-            alert("無法開始：請檢查獎項、名單或是否已抽完。");
-            drumRoll.pause();
-            return;
-        }
+        drumRoll.currentTime = 0; drumRoll.play().catch(e => console.log("Audio play blocked"));
+        if (!hasStarted && candidates.length > 0) { backupCandidatesText = document.getElementById('candidatesInput').value; hasStarted = true; }
+        if (prizes.length === 0 || candidates.length === 0 || currentPrizeIndex >= prizes.length) { alert("無法開始：請檢查設定。"); drumRoll.pause(); return; }
 
         isRunning = true;
-        document.getElementById('btnStart').style.display = 'none';
-        document.getElementById('btnStop').style.display = 'inline-block';
-        
-        const box = document.getElementById('rollingBox');
-        box.classList.add('active');
+        // 自動收合側邊欄
+        toggleSidebar(true);
 
+        document.getElementById('btnStart').style.display = 'none'; document.getElementById('btnStop').style.display = 'inline-block';
+        if(conn && conn.open) conn.send('started');
+        const box = document.getElementById('rollingBox'); box.classList.add('active');
         if (timer) clearInterval(timer);
-        timer = setInterval(() => {
-            const randomIndex = Math.floor(Math.random() * candidates.length);
-            box.innerText = candidates[randomIndex];
-        }, 50);
+        timer = setInterval(() => { const randomIndex = Math.floor(Math.random() * candidates.length); box.innerText = candidates[randomIndex]; }, 50);
     }
 
     function stopDraw() {
         if (!isRunning) return;
-        clearInterval(timer);
-        isRunning = false;
+        clearInterval(timer); isRunning = false;
+        drumRoll.pause(); sfxCheer.currentTime = 0; sfxCheer.play().catch(e => console.log("Audio error"));
+        if(conn && conn.open) conn.send('stopped');
 
-        drumRoll.pause();
-        sfxCheer.currentTime = 0;
-        sfxCheer.play().catch(e => console.log("Audio error"));
-
-        const winnerIndex = Math.floor(Math.random() * candidates.length);
-        const winnerName = candidates[winnerIndex];
-
-        const box = document.getElementById('rollingBox');
-        box.innerText = winnerName;
-        box.classList.remove('active');
-        
+        const winnerIndex = Math.floor(Math.random() * candidates.length); const winnerName = candidates[winnerIndex];
+        const box = document.getElementById('rollingBox'); box.innerText = winnerName; box.classList.remove('active');
         triggerConfetti();
 
         const prize = prizes[currentPrizeIndex];
         winners.push({ prizeName: prize.name, winner: winnerName });
-        
         candidates.splice(winnerIndex, 1); 
         document.getElementById('candidatesInput').value = candidates.join('\n');
         document.getElementById('candidateCount').innerText = candidates.length;
-
         addWinnerToDOM(prize.name, winnerName);
-
         currentPrizeCountDrawn++;
-        if (currentPrizeCountDrawn >= prize.total) {
-            currentPrizeIndex++;
-            currentPrizeCountDrawn = 0;
-        }
-
-        document.getElementById('btnStart').style.display = 'inline-block';
-        document.getElementById('btnStop').style.display = 'none';
+        if (currentPrizeCountDrawn >= prize.total) { currentPrizeIndex++; currentPrizeCountDrawn = 0; }
+        document.getElementById('btnStart').style.display = 'inline-block'; document.getElementById('btnStop').style.display = 'none';
         updateStatusDisplay();
-
-        if (conn && conn.open) conn.send('stopped');
     }
 
     function triggerConfetti() {
-        var duration = 3 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        var duration = 3000; var animationEnd = Date.now() + duration; var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
         function random(min, max) { return Math.random() * (max - min) + min; }
         var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) { return clearInterval(interval); }
+            var timeLeft = animationEnd - Date.now(); if (timeLeft <= 0) return clearInterval(interval);
             var particleCount = 50 * (timeLeft / duration);
             confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
             confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
         }, 250);
     }
 
-    function addWinnerToDOM(prizeName, winnerName) {
-        const container = document.getElementById('resultsList');
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.innerHTML = `<span class="result-prize">${prizeName}</span><span class="result-name">${winnerName}</span>`;
-        container.insertBefore(item, container.firstChild);
-    }
+    function addWinnerToDOM(p, w) { const c = document.getElementById('resultsList'); const i = document.createElement('div'); i.className = 'result-item'; i.innerHTML = `<span class="result-prize">${p}</span><span class="result-name">${w}</span>`; c.insertBefore(i, c.firstChild); }
 
     function resetAll() {
-        let msg = "確定要重置嗎？";
-        if (hasStarted && backupCandidatesText) msg += "\n\n將還原原始名單並重置。";
-        if (!confirm(msg)) return;
-
-        clearInterval(timer);
-        isRunning = false;
-        drumRoll.pause();
-        
-        winners = [];
-        currentPrizeIndex = 0;
-        currentPrizeCountDrawn = 0;
-        
-        document.getElementById('btnStart').style.display = 'inline-block';
-        document.getElementById('btnStop').style.display = 'none';
-        document.getElementById('rollingBox').innerText = "祝您中大獎！";
-        document.getElementById('rollingBox').classList.remove('active');
+        if (!confirm("確定要重置嗎？")) return;
+        clearInterval(timer); isRunning = false; drumRoll.pause();
+        winners = []; currentPrizeIndex = 0; currentPrizeCountDrawn = 0;
+        document.getElementById('btnStart').style.display = 'inline-block'; document.getElementById('btnStop').style.display = 'none';
+        document.getElementById('rollingBox').innerText = "祝您中大獎！"; document.getElementById('rollingBox').classList.remove('active');
         document.getElementById('resultsList').innerHTML = '';
-
+        if(conn && conn.open) conn.send('stopped');
         if (backupCandidatesText) document.getElementById('candidatesInput').value = backupCandidatesText;
-        
-        parsePrizes();
-        parseCandidates();
-        updateStatusDisplay();
-        hasStarted = false; 
+        parsePrizes(); parseCandidates(); updateStatusDisplay(); hasStarted = false; 
     }
 
     function exportResults() {
-        if (winners.length === 0) { alert("無資料可匯出"); return; }
-        let csvContent = "\uFEFF獎項,得獎者\n";
-        winners.forEach(w => csvContent += `${w.prizeName},${w.winner}\n`);
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `中獎名單_${new Date().getTime()}.csv`;
-        link.click();
+        if (winners.length === 0) { alert("無資料"); return; }
+        let c = "\uFEFF獎項,得獎者\n"; winners.forEach(w => c += `${w.prizeName},${w.winner}\n`);
+        const b = new Blob([c], { type: 'text/csv;charset=utf-8;' }); const u = URL.createObjectURL(b); const l = document.createElement("a"); l.href = u; l.download = `中獎名單_${new Date().getTime()}.csv`; l.click();
     }
 </script>
-
 </body>
 </html>
