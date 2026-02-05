@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>活動抽獎</title>
+    <title>活動抽獎 (V13 Big5相容版)</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -109,8 +109,8 @@
             background: rgba(0,0,0,0.03);
         }
         
-        /* 音效關閉時的樣式 (強制灰色) */
-        .footer-btn.muted { color: #b2bec3 !important; opacity: 0.5; }
+        /* 音效關閉時的樣式 */
+        .footer-btn.muted { color: #dfe6e9; opacity: 0.6; }
 
         /* --- 右側主要內容區 --- */
         .main-content {
@@ -302,7 +302,7 @@
     </div>
 
     <div class="sidebar-footer">
-        <button class="footer-btn" onclick="checkPasswordAndShowQR()" title="手機掃碼連線">📱</button>
+        <button class="footer-btn" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
         <button class="footer-btn muted" id="btnSoundHost" onclick="toggleSound()" title="開啟/關閉音效">🔇</button>
     </div>
 </div>
@@ -349,7 +349,7 @@
 
     // 1. 變數設為 true
     let isMuted = true;
-    // 2. 音效物件設為 true
+    // 2. 音效物件強制設為 true
     drumRoll.muted = true;
     sfxCheer.muted = true;
 
@@ -396,7 +396,7 @@
         if (isController) { initControllerMode(); } else { initHostMode(); }
         updateTitle(); parsePrizes(); parseCandidates(); updateStatusDisplay(); setupFileImports();
         
-        // 強制檢查一次 UI 狀態，確保顯示為靜音
+        // 再次強制確保 UI 顯示為靜音
         const btnHost = document.getElementById('btnSoundHost');
         if(btnHost) {
             btnHost.innerText = "🔇";
@@ -488,8 +488,9 @@
     function handleFileUpload(event, targetId, callback) {
         const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
+        // V13 修改：支援 Big5 讀取
         reader.onload = function(e) { document.getElementById(targetId).value = e.target.result; if (callback) callback(); event.target.value = ''; };
-        reader.readAsText(file, "UTF-8");
+        reader.readAsText(file, "Big5");
     }
 
     function updateTitle() { const val = document.getElementById('titleInput').value; document.getElementById('pageTitle').innerText = val ? val : "活動抽獎"; }
