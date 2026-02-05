@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>活動抽獎</title>
+    <title>活動抽獎 (V12 預設靜音版)</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -109,8 +109,8 @@
             background: rgba(0,0,0,0.03);
         }
         
-        /* 音效關閉時的樣式 */
-        .footer-btn.muted { color: #dfe6e9; opacity: 0.6; }
+        /* 音效關閉時的樣式 (強制灰色) */
+        .footer-btn.muted { color: #b2bec3 !important; opacity: 0.5; }
 
         /* --- 右側主要內容區 --- */
         .main-content {
@@ -342,13 +342,14 @@
 </div>
 
 <script>
-    // --- 音效設定 ---
+    // --- 音效設定 (預設靜音) ---
     const drumRoll = new Audio("https://www.soundjay.com/misc/sounds/drum-roll-01.mp3");
     drumRoll.loop = true;
     const sfxCheer = new Audio("https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg");
 
-    // 預設靜音
+    // 1. 變數設為 true
     let isMuted = true;
+    // 2. 音效物件設為 true
     drumRoll.muted = true;
     sfxCheer.muted = true;
 
@@ -394,6 +395,13 @@
     window.addEventListener('DOMContentLoaded', () => {
         if (isController) { initControllerMode(); } else { initHostMode(); }
         updateTitle(); parsePrizes(); parseCandidates(); updateStatusDisplay(); setupFileImports();
+        
+        // 強制檢查一次 UI 狀態，確保顯示為靜音
+        const btnHost = document.getElementById('btnSoundHost');
+        if(btnHost) {
+            btnHost.innerText = "🔇";
+            btnHost.classList.add('muted');
+        }
     });
 
     function checkPasswordAndShowQR() {
