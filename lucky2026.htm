@@ -78,7 +78,8 @@
 
         body.controller-mode header,
         body.controller-mode .main-container,
-        body.controller-mode .btn-mini-qr { display: none !important; }
+        body.controller-mode .btn-mini-qr,
+        body.controller-mode .btn-mini-sound { display: none !important; }
 
         /* --- 桌面版樣式 --- */
         header { 
@@ -122,11 +123,10 @@
             max-width: 350px;
         }
 
-        /* 極簡 QR 按鈕 (左下角) */
-        .btn-mini-qr {
+        /* 左下角懸浮按鈕共用樣式 */
+        .float-btn {
             position: fixed;
             bottom: 10px;
-            left: 10px;
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -143,12 +143,18 @@
             opacity: 0.6;
             color: white;
         }
-        .btn-mini-qr:hover { 
+        .float-btn:hover { 
             opacity: 1; 
             transform: scale(1.1); 
             background: white; 
             color: var(--text-color);
         }
+
+        /* QR Code 按鈕 (靠左) */
+        .btn-mini-qr { left: 10px; }
+        
+        /* 聲音按鈕 (靠 QR Code 右邊 10px 處: 10 + 32 + 10 = 52px) */
+        .btn-mini-sound { left: 52px; }
 
         .input-group { display: flex; flex-direction: column; margin-bottom: 10px; }
         .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
@@ -260,12 +266,14 @@
             body:not(.controller-mode) { height: auto; overflow-y: auto; }
             .panel { min-height: 300px; margin-bottom: 20px; }
             .btn-mini-qr { bottom: 20px; left: 20px; width: 40px; height: 40px; }
+            .btn-mini-sound { bottom: 20px; left: 70px; width: 40px; height: 40px; } /* 手機版間距加大 */
         }
     </style>
 </head>
 <body>
 
-<button class="btn-mini-qr" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
+<button class="float-btn btn-mini-qr" onclick="checkPasswordAndShowQR()" title="手機掃碼連線 (需密碼)">📱</button>
+<button class="float-btn btn-mini-sound" id="btnSound" onclick="toggleSound()" title="開啟/關閉聲音">🔊</button>
 
 <div class="controller-ui" id="controllerUI">
     <div class="controller-status" id="ctrlStatus">等待連線...</div>
@@ -355,6 +363,16 @@
     const drumRoll = new Audio("https://www.soundjay.com/misc/sounds/drum-roll-01.mp3");
     drumRoll.loop = true;
     const sfxCheer = new Audio("https://actions.google.com/sounds/v1/crowds/battle_crowd_celebrate_stutter.ogg");
+
+    // --- 聲音開關控制 ---
+    let isMuted = false;
+    function toggleSound() {
+        isMuted = !isMuted;
+        drumRoll.muted = isMuted;
+        sfxCheer.muted = isMuted;
+        const btn = document.getElementById('btnSound');
+        btn.innerText = isMuted ? "🔇" : "🔊";
+    }
 
     // --- 核心變數 ---
     let candidates = [];
