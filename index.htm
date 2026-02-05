@@ -107,6 +107,8 @@
             width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
             resize: vertical; font-family: inherit; box-sizing: border-box; font-size: 14px;
         }
+        
+        .hint { font-size: 0.85em; color: #7f8c8d; margin-top: 2px; }
 
         .panel-draw {
             flex: 2;
@@ -167,6 +169,7 @@
         @keyframes highlight { 0% { background-color: #fffacd; } 100% { background-color: transparent; } }
         .result-name { font-weight: bold; color: var(--secondary-color); }
         .file-input-hidden { display: none; }
+        .result-prize { font-size: 0.9em; color: #7f8c8d; margin-right: 10px; }
 
         /* QR Code Modal */
         .modal-overlay {
@@ -233,6 +236,7 @@
 陳美麗
 林志玲</textarea>
             <div class="hint">剩餘人數: <span id="candidateCount" style="color:var(--primary-color); font-weight:bold;">0</span> 人</div>
+            <div class="hint" style="color:#e74c3c;">(注意：中獎者將自動從此框刪除)</div>
         </div>
 
         <div style="margin-top: auto;">
@@ -244,7 +248,7 @@
         <div class="current-prize-info" id="currentPrizeDisplay">準備就緒...</div>
         
         <div class="draw-box" id="rollingBox">
-            Lucky Draw
+            祝您中大獎！
         </div>
 
         <div class="controls">
@@ -561,7 +565,9 @@
 
         // 如果手機還連線著，強制重置手機按鈕狀態
         if (conn && conn.open) {
-            // 這邊不需要特別傳送，手機按鈕是本地邏輯切換，但如果想讓兩邊完全一致可以在這裡發送狀態
+             // 這裡可以發送重置信號給手機，但目前的簡易邏輯是手機自己切換
+             // 為了保險，讓手機也知道停止了
+             conn.send('stopped');
         }
     }
 
@@ -586,7 +592,10 @@
         
         document.getElementById('btnStart').style.display = 'inline-block';
         document.getElementById('btnStop').style.display = 'none';
-        document.getElementById('rollingBox').innerText = "Lucky Draw";
+        
+        // --- 這裡也同步更新了重置後的文字 ---
+        document.getElementById('rollingBox').innerText = "祝您中大獎！";
+        
         document.getElementById('rollingBox').classList.remove('active');
         document.getElementById('resultsList').innerHTML = '';
 
