@@ -1,0 +1,43 @@
+.hoge {
+  position: absolute;
+  width: 207px;
+  height: 214px;
+  background: white;
+  z-index: 10;
+}
+.hoge::after {
+  position: absolute;
+  content: "46";
+  font-size: 60px;
+  font-family: -webkit-pictograph;
+  color: #ffffff;
+  right: 12px;
+  bottom: 0;
+  z-index: 100;
+}
+.triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 207.10606275811px 200px;
+}
+.sorairo {
+  position: relative;
+  border-color: transparent transparent #5bbee4 transparent;
+  z-index: 50;
+}
+.murasaki {
+  position: absolute;
+  border-color: transparent transparent #802b84 transparent;
+  margin-left: 20px;
+  margin-top: 20px;
+  z-index: 1;
+}
+.hinatazaka {
+  position: absolute;
+  color: #5bbee4;
+  font-size: 50px;
+  font-family: serif;
+  top: 225px;
+  left: 80px;
+}

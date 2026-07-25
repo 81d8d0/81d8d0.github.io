@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>日向坂ロゴ</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400&display=swap" rel="stylesheet">
+
+    <style>
+        /* 頁面置中與背景設定 */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white; /* 配合遮罩，必須是白色 */
+        }
+
+        /* 外層容器 */
+        #wrapper {
+            position: relative;
+            width: 300px;
+            height: 350px;
+        }
+
+        /* 白色遮罩層 (hoge) */
+        .hoge {
+            position: absolute;
+            width: 207px;
+            height: 214px;
+            background: white; /* 遮擋紫色三角形的關鍵 */
+            z-index: 10;
+            top: 0;
+            left: 0;
+        }
+
+        /* "46" 的設定 */
+        .hoge::after {
+            position: absolute;
+            content: "46";
+            font-size: 60px;
+            
+            /* 套用 Noto Serif TC */
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 400; 
+            
+            color: #ffffff; /* 白色文字 */
+            right: 12px;
+            bottom: 0;
+            z-index: 100;
+            /* 微調文字位置，因為粗體可能會讓字變寬 */
+            letter-spacing: -2px; 
+        }
+
+        /* 三角形通用設定 */
+        .triangle {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 207.1px 200px;
+        }
+
+        /* 空色（藍色）三角形 */
+        .sorairo {
+            position: relative;
+            border-color: transparent transparent #5bbee4 transparent;
+            z-index: 50;
+        }
+
+        /* 紫色三角形 */
+        .murasaki {
+            position: absolute;
+            border-color: transparent transparent #802b84 transparent;
+            margin-left: 20px;
+            margin-top: 20px;
+            z-index: 1; /* 底層 */
+            top: 0;
+            left: 0;
+        }
+
+        /* "日向坂" 文字設定 */
+        .hinatazaka {
+            position: absolute;
+            color: #5bbee4;
+            font-size: 50px;
+            
+            /* 套用 Noto Serif TC */
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 400; 
+            
+            top: 220px;
+            width: 100%;
+            text-align: center;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+        <div class="logo">
+            <div class="hoge">
+                <div class="triangle sorairo"></div>
+            </div>
+            <div class="triangle murasaki"></div>
+        </div>
+        <span class="hinatazaka">日向坂</span>
+    </div>
+</body>
+</html>
